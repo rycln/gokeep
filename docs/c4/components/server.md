@@ -2,17 +2,26 @@
     C4Component
         title Сервер - Компоненты
 
-        Container_Boundary(server, "Сервер") {
-            Component(Auth, "Auth Service", "Go", "Регистрация/аутентификация\nJWT-авторизация")
-            Component(DataManager, "Data Manager", "Go", "CRUD операций с данными\nВалидация форматов")
-            Component(Crypto, "Crypto Service", "Go", "Шифрование/дешифровка\nУправление ключами")
-            Component(SyncEngine, "Sync Engine", "Go", "Обработка изменений\nРазрешение конфликтов")
-            Component(API_Gateway, "API Gateway", "Go", "Маршрутизация запросов\nЛогирование")
+        Person(Пользователь, "Пользователь сервиса")
+        Container_Boundary(server, "Сервер GophKeeper") {
+            Component(GrpcGateway, "gRPC Gateway", "Go", "Маршрутизация, interceptors")
+            Component(AuthService, "Auth Service", "Go", "Регистрация, аутентификация")
+            Component(DataService, "Data Service", "Go", "CRUD данных")
+            Component(SyncService, "Sync Service", "Go", "Синхронизация изменений")
+            Component(UserStorage, "User Storage", "PostgreSQL", "Хранение пользователей")
+            Component(DataStorage, "Data Storage", "PostgreSQL", "Зашифрованные данные")
+            Component(Crypto, "Crypto Service", "Go", "JWT")
         }
 
-        Rel(API_Gateway, Auth, "Проверка токенов")
-        Rel(API_Gateway, DataManager, "Запросы данных")
-        Rel(DataManager, Crypto, "Шифрование перед сохранением")
-        Rel(DataManager, SyncEngine, "Уведомления об изменениях")
-        Rel(SyncEngine, DataManager, "Запросы на обновление")
+        Container(client, "Клиент", "Go", "Клиент")
+
+        Rel(Пользователь, client, "Использует")
+        Rel(client, GrpcGateway, "gRPC")
+        Rel(GrpcGateway, AuthService, "gRPC")
+        Rel(GrpcGateway, DataService, "gRPC", "Зашифрованные данные")
+        Rel(GrpcGateway, SyncService, "gRPC-stream")
+        Rel(AuthService, UserStorage, "Проверка паролей")
+        Rel(DataService, DataStorage, "Чтение/запись")
+        Rel(SyncService, DataStorage, "Получение/добавление изменений (Last Write Wins)")
+        Rel(AuthService, Crypto, "Генерация JWT")
 ```
