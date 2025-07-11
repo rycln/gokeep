@@ -11,10 +11,10 @@ type AuthClient struct {
 	client pb.GophKeeperClient
 }
 
-func (c *AuthClient) Register(ctx context.Context, username, password string) (*models.User, error) {
+func (c *AuthClient) Register(ctx context.Context, req *models.UserAuthReq) (*models.User, error) {
 	res, err := c.client.Register(ctx, &pb.RegisterRequest{
-		Username: username,
-		Password: password,
+		Username: req.Username,
+		Password: req.Password,
 	})
 
 	if err != nil {
@@ -28,10 +28,10 @@ func (c *AuthClient) Register(ctx context.Context, username, password string) (*
 	}, err
 }
 
-func (c *AuthClient) Login(ctx context.Context, username, password string) (*models.User, error) {
+func (c *AuthClient) Login(ctx context.Context, req *models.UserAuthReq) (*models.User, error) {
 	res, err := c.client.Login(ctx, &pb.LoginRequest{
-		Username: username,
-		Password: password,
+		Username: req.Username,
+		Password: req.Password,
 	})
 
 	if err != nil {

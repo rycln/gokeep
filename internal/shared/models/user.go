@@ -2,14 +2,14 @@ package models
 
 type UserID string
 
-type UserAuth struct {
-	Login    string
+type UserAuthReq struct {
+	Username string
 	Password string
 }
 
 type UserDB struct {
 	ID       UserID
-	Login    string
+	Username string
 	PassHash string
 }
 
