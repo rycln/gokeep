@@ -1,4 +1,3 @@
-
 ```mermaid
 C4Context
     title Система GophKeeper - Контекст
