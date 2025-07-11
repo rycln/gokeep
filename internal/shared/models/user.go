@@ -12,3 +12,9 @@ type UserDB struct {
 	Login    string
 	PassHash string
 }
+
+type User struct {
+	ID     UserID
+	JWT    string
+	RefJWT string
+}

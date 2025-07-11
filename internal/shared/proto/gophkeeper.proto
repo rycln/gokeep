@@ -17,8 +17,7 @@ message LoginRequest {
 message AuthResponse {
   string user_id = 1;
   string token = 2;
-  int64 expires_at = 3;
-  string refresh_token = 4; 
+  string refresh_token = 3; 
 }
 
 service GophKeeper {

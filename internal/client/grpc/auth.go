@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 
+	"github.com/rycln/gokeep/internal/shared/models"
 	pb "github.com/rycln/gokeep/internal/shared/proto/gen/gophkeeper"
 )
 
@@ -10,10 +11,36 @@ type AuthClient struct {
 	client pb.GophKeeperClient
 }
 
-func (c *AuthClient) Register(ctx context.Context, username, password string) error {
-	_, err := c.client.Register(ctx, &pb.RegisterRequest{
+func (c *AuthClient) Register(ctx context.Context, username, password string) (*models.User, error) {
+	res, err := c.client.Register(ctx, &pb.RegisterRequest{
 		Username: username,
 		Password: password,
 	})
-	return err
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &models.User{
+		ID:     models.UserID(res.UserId),
+		JWT:    res.Token,
+		RefJWT: res.RefreshToken,
+	}, err
+}
+
+func (c *AuthClient) Login(ctx context.Context, username, password string) (*models.User, error) {
+	res, err := c.client.Login(ctx, &pb.LoginRequest{
+		Username: username,
+		Password: password,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &models.User{
+		ID:     models.UserID(res.UserId),
+		JWT:    res.Token,
+		RefJWT: res.RefreshToken,
+	}, err
 }

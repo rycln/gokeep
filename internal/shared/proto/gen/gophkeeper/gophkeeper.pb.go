@@ -129,8 +129,7 @@ type AuthResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Token         string                 `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
-	ExpiresAt     int64                  `protobuf:"varint,3,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
-	RefreshToken  string                 `protobuf:"bytes,4,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"`
+	RefreshToken  string                 `protobuf:"bytes,3,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -179,13 +178,6 @@ func (x *AuthResponse) GetToken() string {
 	return ""
 }
 
-func (x *AuthResponse) GetExpiresAt() int64 {
-	if x != nil {
-		return x.ExpiresAt
-	}
-	return 0
-}
-
 func (x *AuthResponse) GetRefreshToken() string {
 	if x != nil {
 		return x.RefreshToken
@@ -204,13 +196,11 @@ const file_gophkeeper_proto_rawDesc = "" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\"F\n" +
 	"\fLoginRequest\x12\x1a\n" +
 	"\busername\x18\x01 \x01(\tR\busername\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"\x81\x01\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\"b\n" +
 	"\fAuthResponse\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x14\n" +
-	"\x05token\x18\x02 \x01(\tR\x05token\x12\x1d\n" +
-	"\n" +
-	"expires_at\x18\x03 \x01(\x03R\texpiresAt\x12#\n" +
-	"\rrefresh_token\x18\x04 \x01(\tR\frefreshToken2\x90\x01\n" +
+	"\x05token\x18\x02 \x01(\tR\x05token\x12#\n" +
+	"\rrefresh_token\x18\x03 \x01(\tR\frefreshToken2\x90\x01\n" +
 	"\n" +
 	"GophKeeper\x12C\n" +
 	"\bRegister\x12\x1b.gophkeeper.RegisterRequest\x1a\x18.gophkeeper.AuthResponse\"\x00\x12=\n" +
