@@ -11,6 +11,10 @@ type AuthClient struct {
 	client pb.GophKeeperClient
 }
 
+func NewAuthClient() *AuthClient {
+	return &AuthClient{}
+}
+
 func (c *AuthClient) Register(ctx context.Context, req *models.UserAuthReq) (*models.User, error) {
 	res, err := c.client.Register(ctx, &pb.RegisterRequest{
 		Username: req.Username,
