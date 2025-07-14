@@ -5,14 +5,17 @@ import (
 
 	"github.com/rycln/gokeep/internal/shared/models"
 	pb "github.com/rycln/gokeep/internal/shared/proto/gen/gophkeeper"
+	"google.golang.org/grpc"
 )
 
 type AuthClient struct {
 	client pb.GophKeeperClient
 }
 
-func NewAuthClient() *AuthClient {
-	return &AuthClient{}
+func NewAuthClient(conn *grpc.ClientConn) *AuthClient {
+	return &AuthClient{
+		client: pb.NewGophKeeperClient(conn),
+	}
 }
 
 func (c *AuthClient) Register(ctx context.Context, req *models.UserAuthReq) (*models.User, error) {
