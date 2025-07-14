@@ -2,10 +2,13 @@ package auth
 
 import (
 	"context"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/rycln/gokeep/internal/shared/models"
 )
+
+const timeout = time.Duration(5) * time.Second
 
 func (m Model) Init() tea.Cmd {
 	return nil
@@ -16,6 +19,25 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case LoginState, RegisterState:
 		return handleAuthInput(m, msg)
 	case ProcessingState:
+		switch msg := msg.(type) {
+		case LoginErrorMsg:
+			m.errMsg = msg.Err.Error()
+			m.state = ErrorState
+		case RegisterErrorMsg:
+			m.errMsg = msg.Err.Error()
+			m.state = ErrorState
+		case AuthSuccessMsg:
+			m.state = SuccessState
+		}
+		return m, nil
+	case ErrorState:
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch msg.Type {
+			case tea.KeyEnter:
+				m.state = LoginState
+			}
+		}
 		return m, nil
 	default:
 		//здесь сделать успешный вход
@@ -70,7 +92,9 @@ func handleAuthInput(m Model, msg tea.Msg) (Model, tea.Cmd) {
 
 func (m Model) login() tea.Cmd {
 	return func() tea.Msg {
-		user, err := m.service.UserLogin(context.Background(), &models.UserAuthReq{
+		ctx, cancel := context.WithTimeout(context.Background(), timeout)
+		defer cancel()
+		user, err := m.service.UserLogin(ctx, &models.UserAuthReq{
 			Username: m.username,
 			Password: m.password,
 		})
@@ -83,7 +107,9 @@ func (m Model) login() tea.Cmd {
 
 func (m Model) register() tea.Cmd {
 	return func() tea.Msg {
-		user, err := m.service.UserRegister(context.Background(), &models.UserAuthReq{
+		ctx, cancel := context.WithTimeout(context.Background(), timeout)
+		defer cancel()
+		user, err := m.service.UserRegister(ctx, &models.UserAuthReq{
 			Username: m.username,
 			Password: m.password,
 		})

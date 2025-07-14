@@ -23,7 +23,7 @@ func (m Model) View() string {
 	case SuccessState:
 		return "✅ Успешно! Нажмите Enter для продолжения..."
 	case ErrorState:
-		return errorStyle.Render("Ошибка: " + m.errMsg)
+		return errorStyle.Render("Ошибка: " + m.errMsg + "\n" + "Нажмите Enter для продолжения...")
 	default:
 		return renderAuthForm(m)
 	}
