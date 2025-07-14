@@ -4,7 +4,9 @@
 
         Person(Пользователь, "Пользователь сервиса")
         Container_Boundary(client, "Клиент") {
-            Component(UI, "User Interface", "Go", "Парсинг команд, вывод данных")
+            Component(TUIRoot, "User Interface Root Model", "Go", "Корневая модель TUI")
+            Component(AuthModel, "Authification/Registration Model", "Go", "Модель экрана аутентификации/регистрации")
+            Component(DataModel, "Data Manager Model", "Go", "Модель экрана управления данными")
             Component(AuthService, "Auth Service", "Go", "Управление сессией, локальное хранение токена")
             Component(DataService, "Data Service", "Go", "Управление данными в локальном хранилище")
             Component(SyncWorker, "Sync Worker", "Go", "Синхронизация локального и удаленного хранилища")
@@ -13,9 +15,11 @@
         }
         Container(Server, "Сервер", "Go","Доступ пользователей, хранение, синхронизация")
 
-        Rel(Пользователь, UI, "Использует")
-        Rel(UI, AuthService, "Запросы регистрации, аутентификации")
-        Rel(UI, DataService, "Команды управления данными")
+        Rel(Пользователь, TUIRoot, "Использует")
+        Rel(TUIRoot, AuthModel, "Вызывает")
+        Rel(TUIRoot, DataModel, "Вызывает")
+        Rel(AuthModel, AuthService, "Запросы регистрации, аутентификации")
+        Rel(DataModel, DataService, "Команды управления данными")
         Rel(AuthService, DataService, "Проверка JWT")
         Rel(DataService, Crypto, "Шифрование/дешифровка")
         Rel(Crypto, FileStorage, "Запись/чтение")
