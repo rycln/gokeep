@@ -66,7 +66,7 @@ func (s *UserService) CreateUser(ctx context.Context, req *models.UserAuthReq) (
 	return user, nil
 }
 
-func (s *UserService) UserAuth(ctx context.Context, req *models.UserAuthReq) (*models.User, error) {
+func (s *UserService) AuthUser(ctx context.Context, req *models.UserAuthReq) (*models.User, error) {
 	userDB, err := s.strg.GetUserByUsername(ctx, req.Username)
 	if err != nil {
 		return nil, err

@@ -6,13 +6,15 @@ import (
 
 	"github.com/rycln/gokeep/internal/shared/models"
 	pb "github.com/rycln/gokeep/internal/shared/proto/gen/gophkeeper"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 const timeout = time.Duration(5) * time.Second
 
 type authServicer interface {
 	CreateUser(context.Context, *models.UserAuthReq) (*models.User, error)
-	UserAuth(context.Context, *models.UserAuthReq) (*models.User, error)
+	AuthUser(context.Context, *models.UserAuthReq) (*models.User, error)
 }
 
 func (s *GophKeeperServer) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.AuthResponse, error) {
@@ -26,7 +28,7 @@ func (s *GophKeeperServer) Register(ctx context.Context, req *pb.RegisterRequest
 
 	user, err := s.auth.CreateUser(ctx, authReq)
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	return &pb.AuthResponse{
@@ -45,9 +47,9 @@ func (s *GophKeeperServer) Login(ctx context.Context, req *pb.LoginRequest) (*pb
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	user, err := s.auth.UserAuth(ctx, authReq)
+	user, err := s.auth.AuthUser(ctx, authReq)
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	return &pb.AuthResponse{
