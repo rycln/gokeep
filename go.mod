@@ -7,9 +7,11 @@ require (
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/google/uuid v1.6.0
+	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.2
 	github.com/jackc/pgerrcode v0.0.0-20240316143900-6e2875d9b438
 	github.com/jackc/pgx/v5 v5.7.5
 	github.com/pressly/goose/v3 v3.24.2
+	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.37.0
 	google.golang.org/grpc v1.73.0
 	google.golang.org/protobuf v1.36.6

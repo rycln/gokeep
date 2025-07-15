@@ -5,7 +5,10 @@ import (
 	"net"
 	"time"
 
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/rycln/gokeep/internal/server/grpc/server"
+	"github.com/rycln/gokeep/internal/server/grpc/server/interceptors"
+	"github.com/rycln/gokeep/internal/server/logger"
 	"github.com/rycln/gokeep/internal/server/services"
 	"github.com/rycln/gokeep/internal/server/storage"
 	"github.com/rycln/gokeep/internal/server/strategies/password"
@@ -22,6 +25,11 @@ const (
 var jwtExp = time.Duration(1) * time.Hour
 
 func main() {
+	err := logger.LogInit("debug")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	db, err := storage.NewDB(dsn)
 	if err != nil {
 		log.Fatal(err)
@@ -33,7 +41,11 @@ func main() {
 	jwtservice := services.NewJWTService(jwtKey, jwtExp)
 	authservice := services.NewUserService(authstrg, passwordStrategy, jwtservice)
 
-	g := grpc.NewServer()
+	g := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(
+			logging.UnaryServerInterceptor(interceptors.InterceptorLogger(logger.Log)),
+		),
+	)
 
 	gs := server.NewGophKeeperServer(authservice)
 
