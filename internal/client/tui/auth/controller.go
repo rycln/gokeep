@@ -39,10 +39,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 		return m, nil
-	default:
-		//здесь сделать успешный вход
-		return m, nil
+	case SuccessState:
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch msg.Type {
+			case tea.KeyEnter:
+				m.state = LoginState
+			}
+		}
 	}
+	return m, nil
 }
 
 func handleAuthInput(m Model, msg tea.Msg) (Model, tea.Cmd) {
@@ -52,11 +58,13 @@ func handleAuthInput(m Model, msg tea.Msg) (Model, tea.Cmd) {
 		case tea.KeyCtrlC:
 			return m, tea.Quit
 		case tea.KeyEnter:
-			m.state = ProcessingState
 			if m.state == LoginState {
+				m.state = ProcessingState
 				return m, m.login()
+			} else {
+				m.state = ProcessingState
+				return m, m.register()
 			}
-			return m, m.register()
 		case tea.KeyTab:
 			if m.state == LoginState {
 				m.state = RegisterState
