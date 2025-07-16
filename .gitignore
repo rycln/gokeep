@@ -20,3 +20,6 @@ vendor/
 
 # Notes
 *.txt
+
+# Local configs
+*.local.json
