@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"log"
 	"os"
 
@@ -10,12 +12,18 @@ import (
 	"github.com/rycln/gokeep/internal/client/tui"
 	"github.com/rycln/gokeep/internal/client/tui/auth"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/credentials"
 )
 
 func main() {
 	//временно в main
-	conn, err := grpc.NewClient(":50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	certPool, _ := x509.SystemCertPool()
+
+	tlsConfig := &tls.Config{
+		RootCAs:    certPool,
+		MinVersion: tls.VersionTLS12,
+	}
+	conn, err := grpc.NewClient(":50051", grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)))
 	if err != nil {
 		log.Fatal(err)
 	}

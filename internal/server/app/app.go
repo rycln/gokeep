@@ -3,7 +3,7 @@
 package app
 
 import (
-	"context"
+	"crypto/tls"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -25,6 +25,7 @@ import (
 	"github.com/rycln/gokeep/internal/server/strategies/password"
 	pb "github.com/rycln/gokeep/internal/shared/proto/gen/gophkeeper"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 // buildInfo holds application build metadata that can be set during compilation.
@@ -39,9 +40,6 @@ const (
 	// jwtExpires sets the lifetime duration for JWT authentication tokens.
 	// Used in auth service when generating new tokens.
 	jwtExpires = time.Duration(2) * time.Hour
-
-	// shutdownTimeout defines timeout for graceful shutdown
-	shutdownTimeout = 5 * time.Second
 )
 
 // App represents the core application layer.
@@ -54,10 +52,9 @@ type App struct {
 // New constructs and initializes the complete application.
 func New() (*App, error) {
 	cfg, err := config.NewConfigBuilder().
-		WithConfigFile().
 		WithFlagParsing().
 		WithEnvParsing().
-		WithDefaultJWTKey().
+		WithConfigFile().
 		Build()
 	if err != nil {
 		return nil, fmt.Errorf("can't initialize config: %v", err)
@@ -70,7 +67,7 @@ func New() (*App, error) {
 
 	db, err := storage.NewDB(cfg.DatabaseDsn)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("can't init DB: %v", err)
 	}
 
 	authstrg := storage.NewUserStorage(db)
@@ -79,7 +76,19 @@ func New() (*App, error) {
 	jwtservice := services.NewJWTService(cfg.Key, jwtExpires)
 	authservice := services.NewUserService(authstrg, passwordStrategy, jwtservice)
 
+	serverCert, err := tls.LoadX509KeyPair(cfg.CertFileName, cfg.CertKeyFileName)
+	if err != nil {
+		return nil, fmt.Errorf("can't load cert: %v", err)
+	}
+
+	tlsConfig := &tls.Config{
+		Certificates: []tls.Certificate{serverCert},
+		ClientAuth:   tls.NoClientCert,
+		MinVersion:   tls.VersionTLS12,
+	}
+
 	g := grpc.NewServer(
+		grpc.Creds(credentials.NewTLS(tlsConfig)),
 		grpc.ChainUnaryInterceptor(
 			logging.UnaryServerInterceptor(interceptors.InterceptorLogger(logger.Log)),
 		),
@@ -116,10 +125,7 @@ func (app *App) Run() error {
 
 	<-shutdown
 
-	shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
-	defer cancel()
-
-	err := app.shutdown(shutdownCtx)
+	err := app.shutdown()
 	if err != nil {
 		return fmt.Errorf("shutdown error: %v", err)
 	}
@@ -135,7 +141,7 @@ func (app *App) Run() error {
 }
 
 // shutdown gracefully shuts down the application components.
-func (app *App) shutdown(ctx context.Context) error {
+func (app *App) shutdown() error {
 	app.grpcserver.GracefulStop()
 
 	return nil
