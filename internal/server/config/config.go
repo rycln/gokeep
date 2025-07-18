@@ -4,6 +4,8 @@ package config
 import (
 	"crypto/rand"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"os"
 	"time"
 
@@ -21,10 +23,7 @@ const (
 	defaultLogLevel  = "debug"
 )
 
-// CfgFile specifies configuration file name
-type CfgFile struct {
-	CfgFileName string `env:"CONFIG"`
-}
+var errEmptyCfgFilepath = errors.New("empty cfg file path")
 
 // Cfg contains all application configuration parameters.
 //
@@ -36,9 +35,6 @@ type CfgFile struct {
 //
 // Tags specify the corresponding environment variable names.
 type Cfg struct {
-	// StorageFilePath contains path for file-based storage
-	StorageFilePath string `json:"file_storage_path" env:"FILE_STORAGE_PATH"`
-
 	// DatabaseDsn specifies database connection string
 	DatabaseDsn string `json:"database_dsn" env:"DATABASE_DSN"`
 
@@ -50,6 +46,15 @@ type Cfg struct {
 
 	// GRPCPort defines port for gRPC endpoints
 	GRPCPort string `json:"grpc_port" env:"GRPC_PORT"`
+
+	// CfgFileName specifies configuration file name
+	CfgFileName string `json:"-" env:"CONFIG"`
+
+	// CertFileName specifies cert file name
+	CertFileName string `json:"cert" env:"CERT"`
+
+	// CertFileName specifies cert key file name
+	CertKeyFileName string `json:"cert_key" env:"CERT_KEY"`
 
 	// Timeout defines default network operation timeout
 	Timeout time.Duration `json:"timeout_dur" env:"TIMEOUT_DUR"`
@@ -79,33 +84,17 @@ func (b *ConfigBuilder) WithConfigFile() *ConfigBuilder {
 		return b
 	}
 
-	var cfgFile = CfgFile{}
-	preFs := flag.NewFlagSet("file-config", flag.ContinueOnError)
-	preFs.ParseErrorsWhitelist.UnknownFlags = true
-
-	preFs.StringVarP(&cfgFile.CfgFileName, "config", "c", "", "Path to config file")
-
-	err := preFs.Parse(os.Args[1:])
-	if err != nil {
-		b.cfg = nil
-		b.err = err
-		return b
-	}
-
-	err = env.Parse(&cfgFile)
-	if err != nil {
-		b.cfg = nil
-		b.err = err
-		return b
-	}
-
-	if cfgFile.CfgFileName != "" {
-		err = getCfgFromFile(cfgFile.CfgFileName, b.cfg)
+	if b.cfg.CfgFileName != "" {
+		err := getCfgFromFile(b.cfg.CfgFileName, b.cfg)
 		if err != nil {
 			b.cfg = nil
-			b.err = err
+			b.err = fmt.Errorf("can't open cfg file: %v", err)
 			return b
 		}
+	} else {
+		b.cfg = nil
+		b.err = errEmptyCfgFilepath
+		return b
 	}
 
 	return b
@@ -130,12 +119,14 @@ func (b *ConfigBuilder) WithFlagParsing() *ConfigBuilder {
 		return b
 	}
 
-	flag.StringVarP(&b.cfg.StorageFilePath, "f", "f", b.cfg.StorageFilePath, "URL storage file path")
 	flag.StringVarP(&b.cfg.DatabaseDsn, "d", "d", b.cfg.DatabaseDsn, "Database connection address")
-	flag.DurationVarP(&b.cfg.Timeout, "o", "o", b.cfg.Timeout, "Timeout duration in seconds")
+	flag.DurationVarP(&b.cfg.Timeout, "t", "t", b.cfg.Timeout, "Timeout duration in seconds")
 	flag.StringVarP(&b.cfg.Key, "k", "k", b.cfg.Key, "Key for jwt autorization")
 	flag.StringVarP(&b.cfg.LogLevel, "l", "l", b.cfg.LogLevel, "Logger level")
 	flag.StringVarP(&b.cfg.GRPCPort, "g", "g", b.cfg.GRPCPort, "gRPC port")
+	flag.StringVarP(&b.cfg.CfgFileName, "config", "c", b.cfg.CfgFileName, "Path to config file")
+	flag.StringVar(&b.cfg.CertFileName, "tls-cert", b.cfg.CertFileName, "Path to cert file")
+	flag.StringVar(&b.cfg.CertKeyFileName, "tls-key", b.cfg.CertKeyFileName, "Path to cert key file")
 	flag.Parse()
 
 	return b
@@ -150,7 +141,7 @@ func (b *ConfigBuilder) WithEnvParsing() *ConfigBuilder {
 	err := env.Parse(b.cfg)
 	if err != nil {
 		b.cfg = nil
-		b.err = err
+		b.err = fmt.Errorf("can't parse env vars: %v", err)
 		return b
 	}
 
@@ -167,7 +158,7 @@ func (b *ConfigBuilder) WithDefaultJWTKey() *ConfigBuilder {
 		key, err := generateKey(defaultKeyLength)
 		if err != nil {
 			b.cfg = nil
-			b.err = err
+			b.err = fmt.Errorf("can't generate jwt key: %v", err)
 			return b
 		}
 		b.cfg.Key = key
@@ -186,33 +177,11 @@ func generateKey(n int) (string, error) {
 	return string(key), nil
 }
 
-// WithFilePath sets file storage filepath.
-func (b *ConfigBuilder) WithFilePath(filepath string) *ConfigBuilder {
-	if b.err != nil {
-		return b
-	}
-
-	b.cfg.StorageFilePath = filepath
-
-	return b
-}
-
-// WithServerAddr sets database dsn string.
-func (b *ConfigBuilder) WithDatabaseDsn(dsn string) *ConfigBuilder {
-	if b.err != nil {
-		return b
-	}
-
-	b.cfg.DatabaseDsn = dsn
-
-	return b
-}
-
 // Build finalizes configuration.
 func (b *ConfigBuilder) Build() (*Cfg, error) {
 	if b.err != nil {
 		return nil, b.err
 	}
 
-	return b.cfg, b.err
+	return b.cfg, nil
 }

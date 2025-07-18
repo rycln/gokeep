@@ -6,12 +6,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/spf13/pflag"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 const (
-	testFilePath    = "urls"
 	testDatabaseDsn = "test_dsn"
 	testTimeout     = time.Duration(3) * time.Minute
 	testKey         = "secret_key"
@@ -21,21 +21,21 @@ const (
 )
 
 var testCfg = &Cfg{
-	StorageFilePath: testFilePath,
-	DatabaseDsn:     testDatabaseDsn,
-	Timeout:         testTimeout,
-	Key:             testKey,
-	LogLevel:        testLoggerLevel,
-	GRPCPort:        testGRPCPort,
+	DatabaseDsn: testDatabaseDsn,
+	Timeout:     testTimeout,
+	Key:         testKey,
+	LogLevel:    testLoggerLevel,
+	GRPCPort:    testGRPCPort,
+	CfgFileName: testCfgFileName,
 }
 
 func TestConfigBuilder_WithEnvParsing(t *testing.T) {
-	t.Setenv("FILE_STORAGE_PATH", testCfg.StorageFilePath)
 	t.Setenv("DATABASE_DSN", testCfg.DatabaseDsn)
 	t.Setenv("TIMEOUT_DUR", testCfg.Timeout.String())
 	t.Setenv("JWT_KEY", testCfg.Key)
 	t.Setenv("LOG_LEVEL", testCfg.LogLevel)
 	t.Setenv("GRPC_PORT", testGRPCPort)
+	t.Setenv("CONFIG", testCfgFileName)
 
 	t.Run("valid test", func(t *testing.T) {
 		cfg, err := NewConfigBuilder().
@@ -57,6 +57,8 @@ func TestConfigBuilder_WithDefaultJWTKey(t *testing.T) {
 }
 
 func TestConfigBuilder_WithFlagParsing(t *testing.T) {
+	pflag.CommandLine = pflag.NewFlagSet(os.Args[0], pflag.ExitOnError)
+
 	oldArgs := os.Args
 	defer func() {
 		os.Args = oldArgs
@@ -65,12 +67,12 @@ func TestConfigBuilder_WithFlagParsing(t *testing.T) {
 	t.Run("valid test", func(t *testing.T) {
 		os.Args = []string{
 			"./server",
-			"-f=" + testCfg.StorageFilePath,
 			"-d=" + testCfg.DatabaseDsn,
-			"-o=" + testCfg.Timeout.String(),
+			"-t=" + testCfg.Timeout.String(),
 			"-k=" + testCfg.Key,
 			"-l=" + testCfg.LogLevel,
-			"-g=" + testGRPCPort,
+			"-g=" + testCfg.GRPCPort,
+			"-c=" + testCfg.CfgFileName,
 		}
 
 		cfg, err := NewConfigBuilder().
@@ -97,6 +99,8 @@ func TestConfigBuilder_WithConfigFile(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Run("file name from flag", func(t *testing.T) {
+		pflag.CommandLine = pflag.NewFlagSet(os.Args[0], pflag.ExitOnError)
+
 		oldArgs := os.Args
 		defer func() {
 			os.Args = oldArgs
@@ -104,15 +108,16 @@ func TestConfigBuilder_WithConfigFile(t *testing.T) {
 
 		os.Args = []string{
 			"./server",
-			"-f=" + testCfg.StorageFilePath,
 			"-d=" + testCfg.DatabaseDsn,
 			"-t=" + testCfg.Timeout.String(),
 			"-k=" + testCfg.Key,
 			"-l=" + testCfg.LogLevel,
-			"-c=" + testCfgFileName,
+			"-g=" + testCfg.GRPCPort,
+			"-c=" + testCfg.CfgFileName,
 		}
 
 		cfg, err := NewConfigBuilder().
+			WithFlagParsing().
 			WithConfigFile().
 			Build()
 		assert.NoError(t, err)
@@ -123,9 +128,17 @@ func TestConfigBuilder_WithConfigFile(t *testing.T) {
 		t.Setenv("CONFIG", testCfgFileName)
 
 		cfg, err := NewConfigBuilder().
+			WithEnvParsing().
 			WithConfigFile().
 			Build()
 		assert.NoError(t, err)
 		assert.Equal(t, testCfg, cfg)
+	})
+
+	t.Run("empty filepath", func(t *testing.T) {
+		_, err := NewConfigBuilder().
+			WithConfigFile().
+			Build()
+		assert.ErrorIs(t, err, errEmptyCfgFilepath)
 	})
 }
