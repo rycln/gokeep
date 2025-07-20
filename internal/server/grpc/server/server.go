@@ -4,16 +4,15 @@ import (
 	pb "github.com/rycln/gokeep/internal/shared/proto/gen/gophkeeper"
 )
 
-type GophKeeperServer struct {
-	pb.UnimplementedGophKeeperServer
-
+type UserHandler struct {
+	pb.UnimplementedUserServiceServer
 	auth authServicer
 }
 
 func NewGophKeeperServer(
 	auth authServicer,
-) *GophKeeperServer {
-	return &GophKeeperServer{
+) *UserHandler {
+	return &UserHandler{
 		auth: auth,
 	}
 }

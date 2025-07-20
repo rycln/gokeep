@@ -17,7 +17,7 @@ type authServicer interface {
 	AuthUser(context.Context, *models.UserAuthReq) (*models.User, error)
 }
 
-func (s *GophKeeperServer) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.AuthResponse, error) {
+func (h *UserHandler) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.AuthResponse, error) {
 	authReq := &models.UserAuthReq{
 		Username: req.Username,
 		Password: req.Password,
@@ -26,7 +26,7 @@ func (s *GophKeeperServer) Register(ctx context.Context, req *pb.RegisterRequest
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	user, err := s.auth.CreateUser(ctx, authReq)
+	user, err := h.auth.CreateUser(ctx, authReq)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
@@ -38,7 +38,7 @@ func (s *GophKeeperServer) Register(ctx context.Context, req *pb.RegisterRequest
 	}, nil
 }
 
-func (s *GophKeeperServer) Login(ctx context.Context, req *pb.LoginRequest) (*pb.AuthResponse, error) {
+func (s *UserHandler) Login(ctx context.Context, req *pb.LoginRequest) (*pb.AuthResponse, error) {
 	authReq := &models.UserAuthReq{
 		Username: req.Username,
 		Password: req.Password,
@@ -57,4 +57,8 @@ func (s *GophKeeperServer) Login(ctx context.Context, req *pb.LoginRequest) (*pb
 		Token:        user.JWT,
 		RefreshToken: user.RefJWT,
 	}, nil
+}
+
+func (s *UserHandler) AuthFuncOverride(ctx context.Context, fullMethodName string) (context.Context, error) {
+	return ctx, nil
 }

@@ -20,7 +20,7 @@ message AuthResponse {
   string refresh_token = 3; 
 }
 
-service GophKeeper {
+service UserService {
   rpc Register (RegisterRequest) returns (AuthResponse) {}
   rpc Login (LoginRequest) returns (AuthResponse) {}
 }

@@ -200,9 +200,8 @@ const file_gophkeeper_proto_rawDesc = "" +
 	"\fAuthResponse\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x14\n" +
 	"\x05token\x18\x02 \x01(\tR\x05token\x12#\n" +
-	"\rrefresh_token\x18\x03 \x01(\tR\frefreshToken2\x90\x01\n" +
-	"\n" +
-	"GophKeeper\x12C\n" +
+	"\rrefresh_token\x18\x03 \x01(\tR\frefreshToken2\x91\x01\n" +
+	"\vUserService\x12C\n" +
 	"\bRegister\x12\x1b.gophkeeper.RegisterRequest\x1a\x18.gophkeeper.AuthResponse\"\x00\x12=\n" +
 	"\x05Login\x12\x18.gophkeeper.LoginRequest\x1a\x18.gophkeeper.AuthResponse\"\x00B>Z<github.com/rycln/gokeep/internal/shared/proto/gen/gophkeeperb\x06proto3"
 
@@ -225,10 +224,10 @@ var file_gophkeeper_proto_goTypes = []any{
 	(*AuthResponse)(nil),    // 2: gophkeeper.AuthResponse
 }
 var file_gophkeeper_proto_depIdxs = []int32{
-	0, // 0: gophkeeper.GophKeeper.Register:input_type -> gophkeeper.RegisterRequest
-	1, // 1: gophkeeper.GophKeeper.Login:input_type -> gophkeeper.LoginRequest
-	2, // 2: gophkeeper.GophKeeper.Register:output_type -> gophkeeper.AuthResponse
-	2, // 3: gophkeeper.GophKeeper.Login:output_type -> gophkeeper.AuthResponse
+	0, // 0: gophkeeper.UserService.Register:input_type -> gophkeeper.RegisterRequest
+	1, // 1: gophkeeper.UserService.Login:input_type -> gophkeeper.LoginRequest
+	2, // 2: gophkeeper.UserService.Register:output_type -> gophkeeper.AuthResponse
+	2, // 3: gophkeeper.UserService.Login:output_type -> gophkeeper.AuthResponse
 	2, // [2:4] is the sub-list for method output_type
 	0, // [0:2] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
