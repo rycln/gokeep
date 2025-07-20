@@ -9,12 +9,12 @@ import (
 )
 
 type AuthClient struct {
-	client pb.GophKeeperClient
+	client pb.UserServiceClient
 }
 
 func NewAuthClient(conn *grpc.ClientConn) *AuthClient {
 	return &AuthClient{
-		client: pb.NewGophKeeperClient(conn),
+		client: pb.NewUserServiceClient(conn),
 	}
 }
 
