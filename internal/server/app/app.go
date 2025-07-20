@@ -15,6 +15,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/auth"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/rycln/gokeep/internal/server/config"
 	"github.com/rycln/gokeep/internal/server/grpc/server"
@@ -91,12 +92,13 @@ func New() (*App, error) {
 		grpc.Creds(credentials.NewTLS(tlsConfig)),
 		grpc.ChainUnaryInterceptor(
 			logging.UnaryServerInterceptor(interceptors.InterceptorLogger(logger.Log)),
+			auth.UnaryServerInterceptor(interceptors.NewAuthInterceptor(jwtservice).AuthFunc),
 		),
 	)
 
 	gs := server.NewGophKeeperServer(authservice)
 
-	pb.RegisterGophKeeperServer(g, gs)
+	pb.RegisterUserServiceServer(g, gs)
 
 	return &App{
 		grpcserver: g,

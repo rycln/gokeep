@@ -2,7 +2,6 @@ package services
 
 import (
 	"errors"
-	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -50,12 +49,9 @@ func (s *JWTService) NewJWTString(userID models.UserID) (string, error) {
 	return tokenString, nil
 }
 
-func (s *JWTService) ParseIDFromJWTHeader(header string) (models.UserID, error) {
-	tokenString := strings.TrimPrefix(header, "Bearer")
-	tokenString = strings.TrimSpace(tokenString)
-
+func (s *JWTService) ParseIDFromJWT(token string) (models.UserID, error) {
 	claims := &jwtClaims{}
-	_, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
+	_, err := jwt.ParseWithClaims(token, claims, func(t *jwt.Token) (interface{}, error) {
 		return []byte(s.jwtKey), nil
 	})
 	if err != nil {
