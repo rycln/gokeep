@@ -17,7 +17,6 @@ message LoginRequest {
 message AuthResponse {
   string user_id = 1;
   string token = 2;
-  string refresh_token = 3; 
 }
 
 service UserService {

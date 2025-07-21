@@ -32,9 +32,8 @@ func (h *UserHandler) Register(ctx context.Context, req *pb.RegisterRequest) (*p
 	}
 
 	return &pb.AuthResponse{
-		UserId:       string(user.ID),
-		Token:        user.JWT,
-		RefreshToken: user.RefJWT,
+		UserId: string(user.ID),
+		Token:  user.JWT,
 	}, nil
 }
 
@@ -53,9 +52,8 @@ func (s *UserHandler) Login(ctx context.Context, req *pb.LoginRequest) (*pb.Auth
 	}
 
 	return &pb.AuthResponse{
-		UserId:       string(user.ID),
-		Token:        user.JWT,
-		RefreshToken: user.RefJWT,
+		UserId: string(user.ID),
+		Token:  user.JWT,
 	}, nil
 }
 

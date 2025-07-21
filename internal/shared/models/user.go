@@ -14,7 +14,6 @@ type UserDB struct {
 }
 
 type User struct {
-	ID     UserID
-	JWT    string
-	RefJWT string
+	ID  UserID
+	JWT string
 }

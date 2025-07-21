@@ -29,9 +29,8 @@ func (c *AuthClient) Register(ctx context.Context, req *models.UserAuthReq) (*mo
 	}
 
 	return &models.User{
-		ID:     models.UserID(res.UserId),
-		JWT:    res.Token,
-		RefJWT: res.RefreshToken,
+		ID:  models.UserID(res.UserId),
+		JWT: res.Token,
 	}, err
 }
 
@@ -46,8 +45,7 @@ func (c *AuthClient) Login(ctx context.Context, req *models.UserAuthReq) (*model
 	}
 
 	return &models.User{
-		ID:     models.UserID(res.UserId),
-		JWT:    res.Token,
-		RefJWT: res.RefreshToken,
+		ID:  models.UserID(res.UserId),
+		JWT: res.Token,
 	}, err
 }
