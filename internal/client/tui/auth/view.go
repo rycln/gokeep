@@ -20,8 +20,6 @@ func (m Model) View() string {
 	switch m.state {
 	case ProcessingState:
 		return "Пожалуйста, подождите..."
-	case SuccessState:
-		return "✅ Успешно! Нажмите Enter для продолжения..."
 	case ErrorState:
 		return errorStyle.Render("Ошибка: " + m.errMsg + "\n" + "Нажмите Enter для продолжения...")
 	default:

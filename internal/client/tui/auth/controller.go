@@ -27,7 +27,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.errMsg = msg.Err.Error()
 			m.state = ErrorState
 		case AuthSuccessMsg:
-			m.state = SuccessState
+			return m, func() tea.Msg { return msg }
 		}
 		return m, nil
 	case ErrorState:
@@ -39,14 +39,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 		return m, nil
-	case SuccessState:
-		switch msg := msg.(type) {
-		case tea.KeyMsg:
-			switch msg.Type {
-			case tea.KeyEnter:
-				m.state = LoginState
-			}
-		}
 	}
 	return m, nil
 }

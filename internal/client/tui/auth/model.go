@@ -12,7 +12,6 @@ const (
 	LoginState State = iota
 	RegisterState
 	ProcessingState
-	SuccessState
 	ErrorState
 )
 
@@ -31,7 +30,7 @@ type Model struct {
 }
 
 type (
-	AuthSuccessMsg   struct{ user *models.User }
+	AuthSuccessMsg   struct{ User *models.User }
 	LoginErrorMsg    struct{ Err error }
 	RegisterErrorMsg struct{ Err error }
 )
