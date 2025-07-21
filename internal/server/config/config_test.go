@@ -141,4 +141,42 @@ func TestConfigBuilder_WithConfigFile(t *testing.T) {
 			Build()
 		assert.ErrorIs(t, err, errEmptyCfgFilepath)
 	})
+
+	t.Run("wrong file name", func(t *testing.T) {
+		t.Setenv("CONFIG", "wrong_file_name")
+
+		_, err := NewConfigBuilder().
+			WithEnvParsing().
+			WithConfigFile().
+			Build()
+		assert.Error(t, err)
+	})
+
+	t.Run("wrong method chain", func(t *testing.T) {
+		pflag.CommandLine = pflag.NewFlagSet(os.Args[0], pflag.ExitOnError)
+
+		oldArgs := os.Args
+		defer func() {
+			os.Args = oldArgs
+		}()
+
+		os.Args = []string{
+			"./server",
+			"-d=" + testCfg.DatabaseDsn,
+			"-t=" + testCfg.Timeout.String(),
+			"-k=" + testCfg.Key,
+			"-l=" + testCfg.LogLevel,
+			"-g=" + testCfg.GRPCPort,
+			"-c=" + testCfg.CfgFileName,
+		}
+		t.Setenv("CONFIG", testCfgFileName)
+
+		_, err := NewConfigBuilder().
+			WithConfigFile().
+			WithFlagParsing().
+			WithEnvParsing().
+			WithDefaultJWTKey().
+			Build()
+		assert.ErrorIs(t, err, errEmptyCfgFilepath)
+	})
 }
