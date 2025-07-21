@@ -56,6 +56,7 @@ func New() (*App, error) {
 		WithFlagParsing().
 		WithEnvParsing().
 		WithConfigFile().
+		WithDefaultJWTKey().
 		Build()
 	if err != nil {
 		return nil, fmt.Errorf("can't initialize config: %v", err)
