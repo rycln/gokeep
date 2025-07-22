@@ -6,13 +6,13 @@ import (
 
 type UserHandler struct {
 	pb.UnimplementedUserServiceServer
-	auth authServicer
+	uservice userService
 }
 
 func NewGophKeeperServer(
-	auth authServicer,
+	uservice userService,
 ) *UserHandler {
 	return &UserHandler{
-		auth: auth,
+		uservice: uservice,
 	}
 }

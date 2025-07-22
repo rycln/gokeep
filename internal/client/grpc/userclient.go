@@ -12,7 +12,7 @@ type AuthClient struct {
 	client pb.UserServiceClient
 }
 
-func NewAuthClient(conn *grpc.ClientConn) *AuthClient {
+func NewUserClient(conn *grpc.ClientConn) *AuthClient {
 	return &AuthClient{
 		client: pb.NewUserServiceClient(conn),
 	}

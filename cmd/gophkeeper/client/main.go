@@ -29,7 +29,7 @@ func main() {
 	}
 	defer conn.Close()
 
-	authService := services.NewAuthService(client.NewAuthClient(conn))
+	authService := services.NewAuthService(client.NewUserClient(conn))
 
 	authScreen := auth.InitialModel(authService)
 

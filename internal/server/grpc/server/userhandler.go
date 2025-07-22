@@ -10,12 +10,12 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-const timeout = time.Duration(5) * time.Second
-
-type authServicer interface {
+type userService interface {
 	CreateUser(context.Context, *models.UserAuthReq) (*models.User, error)
 	AuthUser(context.Context, *models.UserAuthReq) (*models.User, error)
 }
+
+const timeout = time.Duration(5) * time.Second
 
 func (h *UserHandler) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.AuthResponse, error) {
 	authReq := &models.UserAuthReq{
@@ -26,7 +26,7 @@ func (h *UserHandler) Register(ctx context.Context, req *pb.RegisterRequest) (*p
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	user, err := h.auth.CreateUser(ctx, authReq)
+	user, err := h.uservice.CreateUser(ctx, authReq)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
@@ -46,7 +46,7 @@ func (s *UserHandler) Login(ctx context.Context, req *pb.LoginRequest) (*pb.Auth
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	user, err := s.auth.AuthUser(ctx, authReq)
+	user, err := s.uservice.AuthUser(ctx, authReq)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
