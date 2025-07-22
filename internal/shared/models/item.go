@@ -13,13 +13,11 @@ const (
 	TypeBinary   ItemType = "binary"
 )
 
-type Item struct {
+type ItemInfo struct {
 	ID        ItemID
 	UserID    UserID
 	ItemType  ItemType
 	Name      string
 	Metadata  string
-	Content   []byte
-	CreatedAt time.Time
 	UpdatedAt time.Time
 }
