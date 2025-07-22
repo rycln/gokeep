@@ -11,20 +11,20 @@ type AuthAPI interface {
 	Login(context.Context, *models.UserAuthReq) (*models.User, error)
 }
 
-type AuthService struct {
+type UserService struct {
 	api AuthAPI
 }
 
-func NewAuthService(api AuthAPI) *AuthService {
-	return &AuthService{
+func NewAuthService(api AuthAPI) *UserService {
+	return &UserService{
 		api: api,
 	}
 }
 
-func (s *AuthService) UserRegister(ctx context.Context, req *models.UserAuthReq) (*models.User, error) {
+func (s *UserService) UserRegister(ctx context.Context, req *models.UserAuthReq) (*models.User, error) {
 	return s.api.Register(ctx, req)
 }
 
-func (s *AuthService) UserLogin(ctx context.Context, req *models.UserAuthReq) (*models.User, error) {
+func (s *UserService) UserLogin(ctx context.Context, req *models.UserAuthReq) (*models.User, error) {
 	return s.api.Login(ctx, req)
 }
