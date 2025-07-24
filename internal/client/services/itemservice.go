@@ -7,12 +7,12 @@ import (
 )
 
 type itemStorer interface {
-	AddItem(context.Context, *models.ItemInfo, []byte) error
+	Add(context.Context, *models.ItemInfo, []byte) error
 }
 
 type itemGetter interface {
-	GetUserItemsInfo(context.Context, models.UserID) ([]models.ItemInfo, error)
-	GetContentByName(context.Context, string) ([]byte, error)
+	ListByUser(context.Context, models.UserID) ([]models.ItemInfo, error)
+	GetContent(context.Context, string) ([]byte, error)
 }
 
 type itemStorage interface {
@@ -21,11 +21,25 @@ type itemStorage interface {
 }
 
 type ItemService struct {
-	strg itemStorage
+	storage itemStorage
 }
 
-func NewItemService(strg itemStorage) *ItemService {
+func NewItemService(storage itemStorage) *ItemService {
 	return &ItemService{
-		strg: strg,
+		storage: storage,
 	}
+}
+
+// добавить шифрование
+func (s *ItemService) Add(ctx context.Context, info *models.ItemInfo, content []byte) error {
+	return s.storage.Add(ctx, info, content)
+}
+
+func (s *ItemService) List(ctx context.Context, uid models.UserID) ([]models.ItemInfo, error) {
+	return s.storage.ListByUser(ctx, uid)
+}
+
+// добавить дешифровку
+func (s *ItemService) GetContent(ctx context.Context, name string) ([]byte, error) {
+	return s.storage.GetContent(ctx, name)
 }

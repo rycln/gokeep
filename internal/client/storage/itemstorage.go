@@ -18,7 +18,7 @@ func NewItemStorage(db *sql.DB) *ItemStorage {
 	}
 }
 
-func (s *ItemStorage) AddItem(ctx context.Context, info *models.ItemInfo, content []byte) error {
+func (s *ItemStorage) Add(ctx context.Context, info *models.ItemInfo, content []byte) error {
 	_, err := s.db.ExecContext(
 		ctx,
 		sqlAddItem,
@@ -36,7 +36,7 @@ func (s *ItemStorage) AddItem(ctx context.Context, info *models.ItemInfo, conten
 	return nil
 }
 
-func (s *ItemStorage) GetUserItemsInfo(ctx context.Context, uid models.UserID) (itemsinfo []models.ItemInfo, err error) {
+func (s *ItemStorage) ListByUser(ctx context.Context, uid models.UserID) (itemsinfo []models.ItemInfo, err error) {
 	rows, err := s.db.QueryContext(ctx, sqlGetUserItemsInfo, uid)
 	if err != nil {
 		return nil, err
@@ -73,7 +73,7 @@ func (s *ItemStorage) GetUserItemsInfo(ctx context.Context, uid models.UserID) (
 	return itemsinfo, nil
 }
 
-func (s *ItemStorage) GetContentByName(ctx context.Context, name string) ([]byte, error) {
+func (s *ItemStorage) GetContent(ctx context.Context, name string) ([]byte, error) {
 	row := s.db.QueryRowContext(ctx, sqlGetItemByName, name)
 
 	var content []byte
