@@ -13,7 +13,7 @@ const sqlCreateItemsTable = `
 `
 const sqlAddItem = `
 	INSERT INTO items
-	(id, user_id, type, name, enc_content, metadata) 
+	(id, user_id, type, name, encrypt_content, metadata) 
 	VALUES ($1, $2, $3, $4, $5, $6)
 `
 
