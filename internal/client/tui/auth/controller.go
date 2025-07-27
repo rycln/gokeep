@@ -2,13 +2,10 @@ package auth
 
 import (
 	"context"
-	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/rycln/gokeep/internal/shared/models"
 )
-
-const timeout = time.Duration(5) * time.Second
 
 func (m Model) Init() tea.Cmd {
 	return nil
@@ -19,27 +16,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case LoginState, RegisterState:
 		return handleAuthInput(m, msg)
 	case ProcessingState:
-		switch msg := msg.(type) {
-		case LoginErrorMsg:
-			m.errMsg = msg.Err.Error()
-			m.state = ErrorState
-		case RegisterErrorMsg:
-			m.errMsg = msg.Err.Error()
-			m.state = ErrorState
-		case AuthSuccessMsg:
-			return m, func() tea.Msg { return msg }
-		}
-		return m, nil
+		return handleProcessing(m, msg)
 	case ErrorState:
-		switch msg := msg.(type) {
-		case tea.KeyMsg:
-			switch msg.Type {
-			case tea.KeyEnter:
-				m.state = LoginState
-			}
-		}
-		return m, nil
+		return handleError(m, msg)
 	}
+
 	return m, nil
 }
 
@@ -65,34 +46,41 @@ func handleAuthInput(m Model, msg tea.Msg) (Model, tea.Cmd) {
 			}
 			return m, nil
 		case tea.KeyDown, tea.KeyUp:
-			if m.activeField == "username" {
-				m.activeField = "password"
+			if m.activeField == UsernameField {
+				m.activeField = PasswordField
 			} else {
-				m.activeField = "username"
+				m.activeField = UsernameField
 			}
 		case tea.KeyRunes:
 			if msg.String() == " " {
 				return m, nil
 			}
-			if m.activeField == "username" {
+			if m.activeField == UsernameField {
 				m.username += msg.String()
 			} else {
 				m.password += msg.String()
 			}
 		case tea.KeyBackspace:
-			if m.activeField == "username" && len(m.username) > 0 {
-				m.username = m.username[:len(m.username)-1]
+			if m.activeField == UsernameField && len(m.username) > 0 {
+				runes := []rune(m.username)
+				if len(runes) > 0 {
+					m.username = string(runes[:len(runes)-1])
+				}
 			} else if len(m.password) > 0 {
-				m.password = m.password[:len(m.password)-1]
+				runes := []rune(m.password)
+				if len(runes) > 0 {
+					m.password = string(runes[:len(runes)-1])
+				}
 			}
 		}
 	}
+
 	return m, nil
 }
 
 func (m Model) login() tea.Cmd {
 	return func() tea.Msg {
-		ctx, cancel := context.WithTimeout(context.Background(), timeout)
+		ctx, cancel := context.WithTimeout(context.Background(), m.timeout)
 		defer cancel()
 		user, err := m.service.UserLogin(ctx, &models.UserAuthReq{
 			Username: m.username,
@@ -101,13 +89,14 @@ func (m Model) login() tea.Cmd {
 		if err != nil {
 			return LoginErrorMsg{err}
 		}
+
 		return AuthSuccessMsg{user}
 	}
 }
 
 func (m Model) register() tea.Cmd {
 	return func() tea.Msg {
-		ctx, cancel := context.WithTimeout(context.Background(), timeout)
+		ctx, cancel := context.WithTimeout(context.Background(), m.timeout)
 		defer cancel()
 		user, err := m.service.UserRegister(ctx, &models.UserAuthReq{
 			Username: m.username,
@@ -116,6 +105,34 @@ func (m Model) register() tea.Cmd {
 		if err != nil {
 			return RegisterErrorMsg{err}
 		}
+
 		return AuthSuccessMsg{user}
 	}
+}
+
+func handleProcessing(m Model, msg tea.Msg) (Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case LoginErrorMsg:
+		m.errMsg = msg.Err.Error()
+		m.state = ErrorState
+	case RegisterErrorMsg:
+		m.errMsg = msg.Err.Error()
+		m.state = ErrorState
+	case AuthSuccessMsg:
+		return m, func() tea.Msg { return msg }
+	}
+
+	return m, nil
+}
+
+func handleError(m Model, msg tea.Msg) (Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.Type {
+		case tea.KeyEnter:
+			m.state = LoginState
+		}
+	}
+
+	return m, nil
 }

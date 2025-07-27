@@ -2,17 +2,25 @@ package auth
 
 import (
 	"context"
+	"time"
 
 	"github.com/rycln/gokeep/internal/shared/models"
 )
 
-type State int
+type state int
 
 const (
-	LoginState State = iota
+	LoginState state = iota
 	RegisterState
 	ProcessingState
 	ErrorState
+)
+
+type field int
+
+const (
+	UsernameField field = iota
+	PasswordField
 )
 
 type authService interface {
@@ -21,12 +29,13 @@ type authService interface {
 }
 
 type Model struct {
-	state       State
-	activeField string
+	state       state
+	activeField field
 	username    string
 	password    string
 	errMsg      string
 	service     authService
+	timeout     time.Duration
 }
 
 type (
@@ -35,14 +44,15 @@ type (
 	RegisterErrorMsg struct{ Err error }
 )
 
-func InitialModel(service authService) Model {
+func InitialModel(service authService, timeout time.Duration) Model {
 	return Model{
 		state:       LoginState,
-		activeField: "username",
+		activeField: UsernameField,
 		service:     service,
+		timeout:     timeout,
 	}
 }
 
-func (m Model) GetState() State {
+func (m Model) GetState() state {
 	return m.state
 }

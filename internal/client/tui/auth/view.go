@@ -38,7 +38,7 @@ func renderAuthForm(m Model) string {
 	usernameInput := inputStyle.Render("Логин: " + m.username)
 	passwordInput := inputStyle.Render("Пароль: " + maskPassword(m.password))
 
-	if m.activeField == "username" {
+	if m.activeField == UsernameField {
 		usernameInput = focusedStyle.Render("> Логин: " + m.username)
 	} else {
 		passwordInput = focusedStyle.Render("> Пароль: " + maskPassword(m.password))
