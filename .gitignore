@@ -26,3 +26,6 @@ vendor/
 
 # Certs
 /certs/
+
+# SQLite
+*.db
