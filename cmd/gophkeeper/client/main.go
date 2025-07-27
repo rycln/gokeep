@@ -6,12 +6,14 @@ import (
 	"crypto/x509"
 	"log"
 	"os"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	client "github.com/rycln/gokeep/internal/client/grpc"
 	"github.com/rycln/gokeep/internal/client/services"
 	"github.com/rycln/gokeep/internal/client/storage"
 	"github.com/rycln/gokeep/internal/client/tui"
+	"github.com/rycln/gokeep/internal/client/tui/add"
 	"github.com/rycln/gokeep/internal/client/tui/auth"
 	"github.com/rycln/gokeep/internal/client/tui/vault"
 	"google.golang.org/grpc"
@@ -19,7 +21,8 @@ import (
 )
 
 const (
-	DBpath = "./gophkeeper.db"
+	DBpath  = "./gophkeeper.db"
+	timeout = time.Duration(5) * time.Second
 )
 
 func main() {
@@ -42,15 +45,24 @@ func main() {
 	}
 	defer db.Close()
 
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	err = storage.InitDB(ctx, db)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	itemStorage := storage.NewItemStorage(db)
 
 	authService := services.NewAuthService(client.NewUserClient(conn))
 	itemService := services.NewItemService(itemStorage)
 
-	authScreen := auth.InitialModel(authService)
-	vaultScreen := vault.NewModel(itemService, context.Background())
+	authScreen := auth.InitialModel(authService, timeout)
+	vaultScreen := vault.InitialModel(itemService, timeout)
+	addScreen := add.InitialModel(itemService, timeout)
 
-	p := tea.NewProgram(tui.InitialRootModel(authScreen, vaultScreen))
+	p := tea.NewProgram(tui.InitialRootModel(authScreen, vaultScreen, addScreen))
 	if _, err := p.Run(); err != nil {
 		os.Exit(1)
 	}
