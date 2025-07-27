@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -24,7 +23,3 @@ type ItemInfo struct {
 	Metadata  string
 	UpdatedAt time.Time
 }
-
-func (i ItemInfo) FilterValue() string { return i.Name }
-func (i ItemInfo) Title() string       { return i.Name }
-func (i ItemInfo) Description() string { return fmt.Sprintf("Type: %s", i.ItemType) }

@@ -2,73 +2,74 @@ package vault
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	"github.com/charmbracelet/bubbles/list"
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/rycln/gokeep/internal/shared/models"
 )
 
-type itemAdder interface {
-	Add(context.Context, *models.ItemInfo, []byte) error
-}
+type state int
+
+const (
+	ListState state = iota
+	DetailState
+	ProcessingState
+	ErrorState
+)
+
+type (
+	AddItemReqMsg    struct{ User *models.User }
+	GetContentReqMsg struct{}
+	ItemsMsg         struct{ Items []itemRender }
+	ErrorMsg         struct{ Err error }
+)
 
 type itemGetter interface {
 	List(context.Context, models.UserID) ([]models.ItemInfo, error)
 	GetContent(context.Context, string) ([]byte, error)
 }
 
-type itemService interface {
-	itemAdder
-	itemGetter
+type itemRender struct {
+	ItemType  models.ItemType
+	Name      string
+	Metadata  string
+	UpdatedAt time.Time
+}
+
+func (i itemRender) FilterValue() string { return i.Name }
+func (i itemRender) Title() string       { return i.Name }
+func (i itemRender) Description() string {
+	return fmt.Sprintf("Type: %s\n Desc: %s", i.ItemType, i.Metadata)
 }
 
 type Model struct {
+	state    state
+	selected *itemRender
+	items    []itemRender
 	list     list.Model
-	items    []models.ItemInfo
-	selected *models.ItemInfo
-	content  string
-	service  itemService
-	ctx      context.Context
-	mode     string // "list" or "detail"
+	errMsg   string
+	service  itemGetter
+	user     *models.User
+	timeout  time.Duration
 }
 
-type Msg struct {
-	Items   []models.ItemInfo
-	Content []byte
-	Err     error
-}
-
-func NewModel(service itemService, ctx context.Context) Model {
-	l := list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
+func InitialModel(service itemGetter, timeout time.Duration) Model {
+	l := list.New([]list.Item{}, list.NewDefaultDelegate(), 20, 20)
 	l.Title = "Your Vault"
 	l.Styles.Title = titleStyle
 	l.Styles.PaginationStyle = paginationStyle
-	l.Styles.HelpStyle = helpStyle
+	l.SetShowStatusBar(true)
+	l.SetFilteringEnabled(true)
 
 	return Model{
+		state:   ListState,
 		list:    l,
 		service: service,
-		ctx:     ctx,
-		mode:    "list",
+		timeout: timeout,
 	}
 }
 
-func (m Model) LoadItems(userID models.UserID) tea.Cmd {
-	return func() tea.Msg {
-		items, err := m.service.List(m.ctx, userID)
-		if err != nil {
-			return Msg{Err: err}
-		}
-		return Msg{Items: items}
-	}
-}
-
-func (m Model) LoadItemContent(name string) tea.Cmd {
-	return func() tea.Msg {
-		content, err := m.service.GetContent(m.ctx, name)
-		if err != nil {
-			return Msg{Err: err}
-		}
-		return Msg{Content: content}
-	}
+func (m *Model) SetUser(user *models.User) {
+	m.user = user
 }

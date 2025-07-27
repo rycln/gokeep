@@ -11,14 +11,13 @@ import (
 var (
 	titleStyle      = lipgloss.NewStyle().MarginLeft(2)
 	paginationStyle = list.DefaultStyles().PaginationStyle.PaddingLeft(4)
-	helpStyle       = list.DefaultStyles().HelpStyle.PaddingLeft(4).PaddingBottom(1)
 )
 
 func (m Model) View() string {
-	switch m.mode {
-	case "list":
+	switch m.state {
+	case ListState:
 		return m.listView()
-	case "detail":
+	case DetailState:
 		return m.detailView()
 	default:
 		return ""
@@ -26,14 +25,13 @@ func (m Model) View() string {
 }
 
 func (m Model) listView() string {
-	return m.list.View() + "\nPress 'n' to add new item, 'q' to quit"
+	return m.list.View()
 }
 
 func (m Model) detailView() string {
 	var b strings.Builder
 	b.WriteString(fmt.Sprintf("Selected: %s\n", m.selected.Name))
 	b.WriteString(fmt.Sprintf("Type: %s\n", m.selected.ItemType))
-	b.WriteString(fmt.Sprintf("Content:\n%s\n\n", m.content))
 	b.WriteString("Press ESC to return to list")
 	return b.String()
 }
