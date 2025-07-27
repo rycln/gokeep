@@ -1,25 +1,34 @@
 package tui
 
 import (
+	"github.com/rycln/gokeep/internal/client/tui/add"
 	"github.com/rycln/gokeep/internal/client/tui/auth"
 	"github.com/rycln/gokeep/internal/client/tui/vault"
-	"github.com/rycln/gokeep/internal/shared/models"
 
 	tea "github.com/charmbracelet/bubbletea"
+)
+
+type model int
+
+const (
+	AuthModel model = iota
+	VaultModel
+	AddModel
 )
 
 type rootModel struct {
 	authModel  auth.Model
 	vaultModel vault.Model
-	current    string
-	user       *models.User
+	addModel   add.Model
+	current    model
 }
 
-func InitialRootModel(auth auth.Model, vault vault.Model) rootModel {
+func InitialRootModel(auth auth.Model, vault vault.Model, add add.Model) rootModel {
 	return rootModel{
 		authModel:  auth,
 		vaultModel: vault,
-		current:    "auth",
+		addModel:   add,
+		current:    AuthModel,
 	}
 }
 
@@ -30,21 +39,34 @@ func (m rootModel) Init() tea.Cmd {
 func (m rootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case auth.AuthSuccessMsg:
-		m.user = msg.User
-		m.current = "vault"
+		m.vaultModel.SetUser(msg.User)
+		m.current = VaultModel
+		return m, nil
+	case vault.AddItemReqMsg:
+		m.addModel.SetUser(msg.User)
+		m.current = AddModel
+		return m, nil
+	case add.CancelMsg:
+		m.current = VaultModel
 		return m, nil
 	default:
 		switch m.current {
-		case "auth":
+		case AuthModel:
 			updated, cmd := m.authModel.Update(msg)
 			if authModel, ok := updated.(auth.Model); ok {
 				m.authModel = authModel
 			}
 			return m, cmd
-		case "vault":
+		case VaultModel:
 			updated, cmd := m.vaultModel.Update(msg)
 			if vaultModel, ok := updated.(vault.Model); ok {
 				m.vaultModel = vaultModel
+			}
+			return m, cmd
+		case AddModel:
+			updated, cmd := m.addModel.Update(msg)
+			if addModel, ok := updated.(add.Model); ok {
+				m.addModel = addModel
 			}
 			return m, cmd
 		default:
@@ -55,10 +77,12 @@ func (m rootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m rootModel) View() string {
 	switch m.current {
-	case "auth":
+	case AuthModel:
 		return m.authModel.View()
-	case "vault":
+	case VaultModel:
 		return m.vaultModel.View()
+	case AddModel:
+		return m.addModel.View()
 	default:
 		return ""
 	}
