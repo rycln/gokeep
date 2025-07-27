@@ -23,6 +23,12 @@ const (
 	PasswordField
 )
 
+type (
+	AuthSuccessMsg   struct{ User *models.User }
+	LoginErrorMsg    struct{ Err error }
+	RegisterErrorMsg struct{ Err error }
+)
+
 type authService interface {
 	UserRegister(context.Context, *models.UserAuthReq) (*models.User, error)
 	UserLogin(context.Context, *models.UserAuthReq) (*models.User, error)
@@ -37,12 +43,6 @@ type Model struct {
 	service     authService
 	timeout     time.Duration
 }
-
-type (
-	AuthSuccessMsg   struct{ User *models.User }
-	LoginErrorMsg    struct{ Err error }
-	RegisterErrorMsg struct{ Err error }
-)
 
 func InitialModel(service authService, timeout time.Duration) Model {
 	return Model{
