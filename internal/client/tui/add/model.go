@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/rycln/gokeep/internal/client/tui/add/card"
 	"github.com/rycln/gokeep/internal/client/tui/add/logpass"
 	"github.com/rycln/gokeep/internal/shared/models"
 )
@@ -13,6 +14,7 @@ type state int
 const (
 	SelectState state = iota
 	AddPassword
+	AddCard
 	ProcessingState
 	ErrorState
 )
@@ -21,7 +23,7 @@ type choice string
 
 const (
 	password = "Логин/Пароль"
-	card     = "Банковская карта"
+	bankcard = "Банковская карта"
 	text     = "Текст"
 	binary   = "Бинарный файл"
 )
@@ -42,6 +44,7 @@ type Model struct {
 	cursor       int
 	errMsg       string
 	logpassModel logpass.Model
+	cardModel    card.Model
 	user         *models.User
 	service      itemAdder
 	timeout      time.Duration
@@ -50,8 +53,9 @@ type Model struct {
 func InitialModel(service itemAdder, timeout time.Duration) Model {
 	return Model{
 		state:        SelectState,
-		choices:      []choice{password, card, text, binary},
+		choices:      []choice{password, bankcard, text, binary},
 		logpassModel: logpass.InitialModel(),
+		cardModel:    card.InitialModel(),
 		service:      service,
 		timeout:      timeout,
 	}

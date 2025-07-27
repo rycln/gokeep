@@ -4,6 +4,7 @@ import (
 	"context"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/rycln/gokeep/internal/client/tui/add/card"
 	"github.com/rycln/gokeep/internal/client/tui/add/logpass"
 	"github.com/rycln/gokeep/internal/shared/models"
 )
@@ -26,12 +27,30 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case logpass.CancelMsg:
 		m.state = SelectState
 		return m, nil
+	case card.CardMsg:
+		info := msg.Info
+		info.UserID = m.user.ID
+		m.state = ProcessingState
+		return m, m.add(info, msg.Content)
+	case card.ErrMsg:
+		m.errMsg = msg.Err.Error()
+		m.state = ErrorState
+		return m, nil
+	case card.CancelMsg:
+		m.state = SelectState
+		return m, nil
 	default:
 		switch m.state {
 		case AddPassword:
 			updated, cmd := m.logpassModel.Update(msg)
 			if logpassModel, ok := updated.(logpass.Model); ok {
 				m.logpassModel = logpassModel
+			}
+			return m, cmd
+		case AddCard:
+			updated, cmd := m.cardModel.Update(msg)
+			if cardModel, ok := updated.(card.Model); ok {
+				m.cardModel = cardModel
 			}
 			return m, cmd
 		default:
@@ -77,6 +96,8 @@ func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
 			switch choice {
 			case password:
 				m.state = AddPassword
+			case bankcard:
+				m.state = AddCard
 			}
 		}
 

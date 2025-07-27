@@ -14,6 +14,8 @@ func (m Model) View() string {
 		return m.selectView()
 	case AddPassword:
 		return m.logpassModel.View()
+	case AddCard:
+		return m.cardModel.View()
 	case ErrorState:
 		return m.errorView()
 	default:
