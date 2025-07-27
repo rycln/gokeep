@@ -2,7 +2,9 @@ package services
 
 import (
 	"context"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/rycln/gokeep/internal/shared/models"
 )
 
@@ -32,6 +34,8 @@ func NewItemService(storage itemStorage) *ItemService {
 
 // добавить шифрование
 func (s *ItemService) Add(ctx context.Context, info *models.ItemInfo, content []byte) error {
+	info.ID = models.ItemID(uuid.New().String())
+	info.UpdatedAt = time.Now()
 	return s.storage.Add(ctx, info, content)
 }
 
