@@ -6,6 +6,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/rycln/gokeep/internal/client/tui/items/card"
 	"github.com/rycln/gokeep/internal/client/tui/items/logpass"
+	"github.com/rycln/gokeep/internal/client/tui/items/text"
 	"github.com/rycln/gokeep/internal/client/tui/shared/input"
 	"github.com/rycln/gokeep/internal/shared/models"
 )
@@ -40,6 +41,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			updated, cmd := m.cardModel.Update(msg)
 			if cardModel, ok := updated.(card.Model); ok {
 				m.cardModel = cardModel
+			}
+			return m, cmd
+		case AddText:
+			updated, cmd := m.textModel.Update(msg)
+			if textModel, ok := updated.(text.Model); ok {
+				m.textModel = textModel
 			}
 			return m, cmd
 		default:
@@ -87,6 +94,8 @@ func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
 				m.state = AddPassword
 			case bankcard:
 				m.state = AddCard
+			case textcontent:
+				m.state = AddText
 			}
 		}
 

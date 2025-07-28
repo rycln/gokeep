@@ -12,10 +12,14 @@ func (m Model) View() string {
 	switch m.state {
 	case SelectState:
 		return m.selectView()
+	case ProcessingState:
+		return "Пожалуйста, подождите..."
 	case AddPassword:
 		return m.logpassModel.View()
 	case AddCard:
 		return m.cardModel.View()
+	case AddText:
+		return m.textModel.View()
 	case ErrorState:
 		return m.errorView()
 	default:
