@@ -9,10 +9,10 @@ type ItemID string
 type ItemType string
 
 const (
-	TypePassword ItemType = "password"
-	TypeCard     ItemType = "card"
-	TypeText     ItemType = "text"
-	TypeBinary   ItemType = "binary"
+	TypePassword ItemType = "Пароль"
+	TypeCard     ItemType = "Карта"
+	TypeText     ItemType = "Текст"
+	TypeBinary   ItemType = "Бинарный файл"
 )
 
 type ItemInfo struct {

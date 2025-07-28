@@ -30,8 +30,8 @@ func (m Model) listView() string {
 
 func (m Model) detailView() string {
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("Selected: %s\n", m.selected.Name))
-	b.WriteString(fmt.Sprintf("Type: %s\n", m.selected.ItemType))
-	b.WriteString("Press ESC to return to list")
+	b.WriteString(fmt.Sprintf("Объект: %s\n", m.selected.Name))
+	b.WriteString(fmt.Sprintf("Тип: %s\n", m.selected.ItemType))
+	b.WriteString("Нажмите ESC для возврата к списку...")
 	return b.String()
 }

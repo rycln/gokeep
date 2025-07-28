@@ -40,7 +40,7 @@ type itemRender struct {
 func (i itemRender) FilterValue() string { return i.Name }
 func (i itemRender) Title() string       { return i.Name }
 func (i itemRender) Description() string {
-	return fmt.Sprintf("Type: %s\n Desc: %s", i.ItemType, i.Metadata)
+	return fmt.Sprintf("Тип: %s\n Описание: %s", i.ItemType, i.Metadata)
 }
 
 type Model struct {
@@ -56,7 +56,7 @@ type Model struct {
 
 func InitialModel(service itemGetter, timeout time.Duration) Model {
 	l := list.New([]list.Item{}, list.NewDefaultDelegate(), 20, 20)
-	l.Title = "Your Vault"
+	l.Title = "Goph Keeper"
 	l.Styles.Title = titleStyle
 	l.Styles.PaginationStyle = paginationStyle
 	l.SetShowStatusBar(true)
