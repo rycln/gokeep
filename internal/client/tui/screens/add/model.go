@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/rycln/gokeep/internal/client/tui/items/bin"
 	"github.com/rycln/gokeep/internal/client/tui/items/card"
 	"github.com/rycln/gokeep/internal/client/tui/items/logpass"
 	"github.com/rycln/gokeep/internal/client/tui/items/text"
@@ -17,6 +18,7 @@ const (
 	AddPassword
 	AddCard
 	AddText
+	AddBinary
 	ProcessingState
 	ErrorState
 )
@@ -48,6 +50,7 @@ type Model struct {
 	logpassModel logpass.Model
 	cardModel    card.Model
 	textModel    text.Model
+	binModel     bin.Model
 	user         *models.User
 	service      itemAdder
 	timeout      time.Duration
@@ -60,6 +63,7 @@ func InitialModel(service itemAdder, timeout time.Duration) Model {
 		logpassModel: logpass.InitialModel(),
 		cardModel:    card.InitialModel(),
 		textModel:    text.InitialModel(),
+		binModel:     bin.InitialModel(),
 		service:      service,
 		timeout:      timeout,
 	}

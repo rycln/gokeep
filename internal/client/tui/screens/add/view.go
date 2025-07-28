@@ -20,6 +20,8 @@ func (m Model) View() string {
 		return m.cardModel.View()
 	case AddText:
 		return m.textModel.View()
+	case AddBinary:
+		return m.binModel.View()
 	case ErrorState:
 		return m.errorView()
 	default:

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/rycln/gokeep/internal/client/tui/items/bin"
 	"github.com/rycln/gokeep/internal/client/tui/items/card"
 	"github.com/rycln/gokeep/internal/client/tui/items/logpass"
 	"github.com/rycln/gokeep/internal/client/tui/items/text"
@@ -47,6 +48,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			updated, cmd := m.textModel.Update(msg)
 			if textModel, ok := updated.(text.Model); ok {
 				m.textModel = textModel
+			}
+			return m, cmd
+		case AddBinary:
+			updated, cmd := m.binModel.Update(msg)
+			if binModel, ok := updated.(bin.Model); ok {
+				m.binModel = binModel
 			}
 			return m, cmd
 		default:
@@ -96,6 +103,8 @@ func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
 				m.state = AddCard
 			case textcontent:
 				m.state = AddText
+			case binary:
+				m.state = AddBinary
 			}
 		}
 
