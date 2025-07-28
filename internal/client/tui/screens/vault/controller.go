@@ -123,7 +123,7 @@ func (m Model) getContent() tea.Cmd {
 		var content string
 		switch m.selected.ItemType {
 		case models.TypePassword:
-			content, err = logpass.GetRender(contentBytes)
+			content, err = logpass.GetContentRender(contentBytes)
 			if err != nil {
 				return ErrorMsg{Err: err}
 			}

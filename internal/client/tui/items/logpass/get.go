@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func GetRender(content []byte) (string, error) {
+func GetContentRender(content []byte) (string, error) {
 	var logPass LogPass
 
 	err := json.Unmarshal(content, &logPass)
