@@ -15,6 +15,8 @@ var (
 
 func (m Model) View() string {
 	switch m.state {
+	case StartState:
+		return "Нажмите любую клавишу..."
 	case ListState:
 		return m.listView()
 	case DetailState:

@@ -14,6 +14,7 @@ type state int
 const (
 	ListState state = iota
 	DetailState
+	StartState
 	ProcessingState
 	ErrorState
 )
@@ -63,7 +64,7 @@ func InitialModel(service itemGetter, timeout time.Duration) Model {
 	l.SetFilteringEnabled(true)
 
 	return Model{
-		state:   ListState,
+		state:   StartState,
 		list:    l,
 		service: service,
 		timeout: timeout,

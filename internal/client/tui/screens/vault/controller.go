@@ -2,17 +2,27 @@ package vault
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 func (m Model) Init() tea.Cmd {
+	if m.user == nil {
+		return func() tea.Msg {
+			return ErrorMsg{Err: fmt.Errorf("user not set")}
+		}
+	}
+
 	return nil
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch m.state {
+	case StartState:
+		m.state = ProcessingState
+		return m, m.loadItems()
 	case ListState:
 		return handleListState(m, msg)
 	case DetailState:
@@ -22,14 +32,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	var cmd tea.Cmd
-
 	m.list, cmd = m.list.Update(msg)
 	return m, cmd
 }
 
 func handleListState(m Model, msg tea.Msg) (Model, tea.Cmd) {
-	var cmd tea.Cmd
-
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.Type {
@@ -53,6 +60,7 @@ func handleListState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 		}
 	}
 
+	var cmd tea.Cmd
 	m.list, cmd = m.list.Update(msg)
 	return m, cmd
 }
