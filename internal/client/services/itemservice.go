@@ -14,7 +14,7 @@ type itemStorer interface {
 
 type itemGetter interface {
 	ListByUser(context.Context, models.UserID) ([]models.ItemInfo, error)
-	GetContent(context.Context, string) ([]byte, error)
+	GetContent(context.Context, models.ItemID) ([]byte, error)
 }
 
 type itemStorage interface {
@@ -44,6 +44,6 @@ func (s *ItemService) List(ctx context.Context, uid models.UserID) ([]models.Ite
 }
 
 // добавить дешифровку
-func (s *ItemService) GetContent(ctx context.Context, name string) ([]byte, error) {
-	return s.storage.GetContent(ctx, name)
+func (s *ItemService) GetContent(ctx context.Context, id models.ItemID) ([]byte, error) {
+	return s.storage.GetContent(ctx, id)
 }

@@ -17,11 +17,11 @@ const sqlAddItem = `
 	VALUES ($1, $2, $3, $4, $5, $6)
 `
 
-const sqlGetItemByName = `
+const sqlGetItemByID = `
 	SELECT 
-		encrypt_content,
+		encrypt_content
 	FROM items
-	WHERE name = $1
+	WHERE id = $1
 `
 
 const sqlGetUserItemsInfo = `

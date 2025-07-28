@@ -6,6 +6,8 @@ import (
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/rycln/gokeep/internal/client/tui/items/logpass"
+	"github.com/rycln/gokeep/internal/shared/models"
 )
 
 func (m Model) Init() tea.Cmd {
@@ -78,6 +80,7 @@ func (m Model) loadItems() tea.Cmd {
 		ritems := make([]itemRender, len(items))
 		for i, item := range items {
 			ritems[i] = itemRender{
+				ID:        item.ID,
 				ItemType:  item.ItemType,
 				Name:      item.Name,
 				Metadata:  item.Metadata,
@@ -99,11 +102,35 @@ func handleDetailState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 			m.state = ListState
 			m.selected = nil
 		case tea.KeyEnter:
-			return m, func() tea.Msg { return GetContentReqMsg{} }
+			m.state = ProcessingState
+			return m, m.getContent()
 		}
 	}
 
 	return m, nil
+}
+
+func (m Model) getContent() tea.Cmd {
+	return func() tea.Msg {
+		ctx, cancel := context.WithTimeout(context.Background(), m.timeout)
+		defer cancel()
+
+		contentBytes, err := m.service.GetContent(ctx, m.selected.ID)
+		if err != nil {
+			return ErrorMsg{Err: err}
+		}
+
+		var content string
+		switch m.selected.ItemType {
+		case models.TypePassword:
+			content, err = logpass.GetRender(contentBytes)
+			if err != nil {
+				return ErrorMsg{Err: err}
+			}
+		}
+
+		return ContentMsg{Content: content}
+	}
 }
 
 func handleProcessingState(m Model, msg tea.Msg) (Model, tea.Cmd) {
@@ -120,6 +147,9 @@ func handleProcessingState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 			items[i] = item
 		}
 		return m, m.list.SetItems(items)
+	case ContentMsg:
+		m.selected.Content = msg.Content
+		m.state = DetailState
 	}
 
 	return m, nil

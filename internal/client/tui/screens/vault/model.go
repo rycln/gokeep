@@ -23,19 +23,22 @@ type (
 	AddItemReqMsg    struct{ User *models.User }
 	GetContentReqMsg struct{}
 	ItemsMsg         struct{ Items []itemRender }
+	ContentMsg       struct{ Content string }
 	ErrorMsg         struct{ Err error }
 )
 
 type itemGetter interface {
 	List(context.Context, models.UserID) ([]models.ItemInfo, error)
-	GetContent(context.Context, string) ([]byte, error)
+	GetContent(context.Context, models.ItemID) ([]byte, error)
 }
 
 type itemRender struct {
+	ID        models.ItemID
 	ItemType  models.ItemType
 	Name      string
 	Metadata  string
 	UpdatedAt time.Time
+	Content   string
 }
 
 func (i itemRender) FilterValue() string { return i.Name }

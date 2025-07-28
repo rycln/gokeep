@@ -73,8 +73,8 @@ func (s *ItemStorage) ListByUser(ctx context.Context, uid models.UserID) (itemsi
 	return itemsinfo, nil
 }
 
-func (s *ItemStorage) GetContent(ctx context.Context, name string) ([]byte, error) {
-	row := s.db.QueryRowContext(ctx, sqlGetItemByName, name)
+func (s *ItemStorage) GetContent(ctx context.Context, id models.ItemID) ([]byte, error) {
+	row := s.db.QueryRowContext(ctx, sqlGetItemByID, id)
 
 	var content []byte
 
