@@ -1,4 +1,4 @@
-package models
+package logpass
 
 type LogPass struct {
 	Login    string `json:"login"`

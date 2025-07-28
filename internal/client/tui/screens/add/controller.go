@@ -4,9 +4,9 @@ import (
 	"context"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/rycln/gokeep/internal/client/tui/add/card"
-	"github.com/rycln/gokeep/internal/client/tui/add/logpass"
-	"github.com/rycln/gokeep/internal/client/tui/input"
+	"github.com/rycln/gokeep/internal/client/tui/items/card"
+	"github.com/rycln/gokeep/internal/client/tui/items/logpass"
+	"github.com/rycln/gokeep/internal/client/tui/shared/input"
 	"github.com/rycln/gokeep/internal/shared/models"
 )
 

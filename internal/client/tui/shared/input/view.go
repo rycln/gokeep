@@ -1,7 +1,6 @@
 package input
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -19,8 +18,6 @@ func (m Form) View() string {
 
 	b.WriteString("\n\nДля сохранения нажмите ENTER...\n")
 	b.WriteString("\nДля отмены нажмите ESC...\n")
-
-	b.WriteString(fmt.Sprintf("focused: %d", m.Focused))
 
 	return b.String()
 }

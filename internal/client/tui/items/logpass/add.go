@@ -5,7 +5,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/rycln/gokeep/internal/client/tui/input"
+	"github.com/rycln/gokeep/internal/client/tui/shared/input"
 	"github.com/rycln/gokeep/internal/shared/models"
 )
 
@@ -76,7 +76,7 @@ func (m Model) send() tea.Cmd {
 			Metadata: m.Inputs[1].Value(),
 		}
 
-		logpass := &models.LogPass{
+		logpass := &LogPass{
 			Login:    m.Inputs[2].Value(),
 			Password: m.Inputs[3].Value(),
 		}

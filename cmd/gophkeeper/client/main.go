@@ -13,9 +13,9 @@ import (
 	"github.com/rycln/gokeep/internal/client/services"
 	"github.com/rycln/gokeep/internal/client/storage"
 	"github.com/rycln/gokeep/internal/client/tui"
-	"github.com/rycln/gokeep/internal/client/tui/add"
-	"github.com/rycln/gokeep/internal/client/tui/auth"
-	"github.com/rycln/gokeep/internal/client/tui/vault"
+	"github.com/rycln/gokeep/internal/client/tui/screens/add"
+	"github.com/rycln/gokeep/internal/client/tui/screens/auth"
+	"github.com/rycln/gokeep/internal/client/tui/screens/vault"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )

@@ -5,7 +5,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/rycln/gokeep/internal/client/tui/input"
+	"github.com/rycln/gokeep/internal/client/tui/shared/input"
 	"github.com/rycln/gokeep/internal/shared/models"
 )
 
@@ -85,7 +85,7 @@ func (m Model) send() tea.Cmd {
 			Metadata: m.Inputs[1].Value(),
 		}
 
-		card := &models.Card{
+		card := &Card{
 			CardNumber: m.Inputs[2].Value(),
 			CardOwner:  m.Inputs[3].Value(),
 			ExpiryDate: m.Inputs[4].Value(),

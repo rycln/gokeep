@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/rycln/gokeep/internal/client/tui/add/card"
-	"github.com/rycln/gokeep/internal/client/tui/add/logpass"
+	"github.com/rycln/gokeep/internal/client/tui/items/card"
+	"github.com/rycln/gokeep/internal/client/tui/items/logpass"
 	"github.com/rycln/gokeep/internal/shared/models"
 )
 

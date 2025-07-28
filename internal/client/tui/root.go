@@ -1,9 +1,9 @@
 package tui
 
 import (
-	"github.com/rycln/gokeep/internal/client/tui/add"
-	"github.com/rycln/gokeep/internal/client/tui/auth"
-	"github.com/rycln/gokeep/internal/client/tui/vault"
+	"github.com/rycln/gokeep/internal/client/tui/screens/add"
+	"github.com/rycln/gokeep/internal/client/tui/screens/auth"
+	"github.com/rycln/gokeep/internal/client/tui/screens/vault"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
