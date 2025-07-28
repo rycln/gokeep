@@ -1,21 +1,26 @@
-package card
+package input
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
-func (m Model) View() string {
+func (m Form) View() string {
 	var b strings.Builder
 
 	b.WriteString("Введите данные: \n\n")
 
-	for i := range m.inputs {
-		b.WriteString(m.inputs[i].View())
-		if i < len(m.inputs)-1 {
+	for i := range m.Inputs {
+		b.WriteString(m.Inputs[i].View())
+		if i < len(m.Inputs)-1 {
 			b.WriteRune('\n')
 		}
 	}
 
 	b.WriteString("\n\nДля сохранения нажмите ENTER...\n")
 	b.WriteString("\nДля отмены нажмите ESC...\n")
+
+	b.WriteString(fmt.Sprintf("focused: %d", m.Focused))
 
 	return b.String()
 }
