@@ -4,6 +4,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/rycln/gokeep/internal/client/tui/shared/messages"
 )
 
 var (
@@ -24,7 +25,7 @@ func (m Form) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyCtrlC:
 			return m, tea.Quit
 		case tea.KeyEsc:
-			return m, func() tea.Msg { return CancelMsg{} }
+			return m, func() tea.Msg { return messages.CancelMsg{} }
 		case tea.KeyUp:
 			m.Focused--
 			if m.Focused < 0 {

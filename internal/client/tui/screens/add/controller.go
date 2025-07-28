@@ -8,7 +8,7 @@ import (
 	"github.com/rycln/gokeep/internal/client/tui/items/card"
 	"github.com/rycln/gokeep/internal/client/tui/items/logpass"
 	"github.com/rycln/gokeep/internal/client/tui/items/text"
-	"github.com/rycln/gokeep/internal/client/tui/shared/input"
+	"github.com/rycln/gokeep/internal/client/tui/shared/messages"
 	"github.com/rycln/gokeep/internal/shared/models"
 )
 
@@ -18,16 +18,16 @@ func (m Model) Init() tea.Cmd {
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case input.ItemMsg:
+	case messages.ItemMsg:
 		info := msg.Info
 		info.UserID = m.user.ID
 		m.state = ProcessingState
 		return m, m.add(info, msg.Content)
-	case input.ErrMsg:
+	case messages.ErrMsg:
 		m.errMsg = msg.Err.Error()
 		m.state = ErrorState
 		return m, nil
-	case input.CancelMsg:
+	case messages.CancelMsg:
 		m.state = SelectState
 		return m, nil
 	default:

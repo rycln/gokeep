@@ -6,6 +6,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/rycln/gokeep/internal/client/tui/shared/input"
+	"github.com/rycln/gokeep/internal/client/tui/shared/messages"
 	"github.com/rycln/gokeep/internal/shared/models"
 )
 
@@ -94,10 +95,10 @@ func (m Model) send() tea.Cmd {
 
 		content, err := json.Marshal(card)
 		if err != nil {
-			return input.ErrMsg{Err: err}
+			return messages.ErrMsg{Err: err}
 		}
 
-		return input.ItemMsg{
+		return messages.ItemMsg{
 			Info:    info,
 			Content: content,
 		}
