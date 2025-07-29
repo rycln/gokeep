@@ -47,6 +47,7 @@ func (m rootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.current = AddModel
 		return m, nil
 	case add.CancelMsg:
+		m.vaultModel.SetUpdateState()
 		m.current = VaultModel
 		return m, nil
 	default:

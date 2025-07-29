@@ -24,7 +24,7 @@ func (m Model) Init() tea.Cmd {
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch m.state {
-	case StartState:
+	case UpdateState:
 		m.state = ProcessingState
 		return m, m.loadItems()
 	case ListState:
@@ -101,7 +101,7 @@ func handleDetailState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 		case tea.KeyCtrlC:
 			return m, tea.Quit
 		case tea.KeyEsc, tea.KeyBackspace:
-			m.state = ListState
+			m.state = UpdateState
 			m.selected = nil
 		case tea.KeyEnter:
 			m.state = ProcessingState

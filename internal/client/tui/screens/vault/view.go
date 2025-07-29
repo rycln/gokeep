@@ -16,7 +16,7 @@ var (
 
 func (m Model) View() string {
 	switch m.state {
-	case StartState:
+	case UpdateState:
 		return "Нажмите любую клавишу..."
 	case ProcessingState:
 		return "Пожалуйста, подождите..."
