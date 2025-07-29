@@ -42,7 +42,7 @@ func (m Model) detailView() string {
 	if m.selected.Content != "" {
 		b.WriteString(m.selected.Content)
 	}
-	b.WriteString("Нажмите ENTER для загрузки данных...")
+	b.WriteString("Нажмите ENTER для загрузки данных...\n\n")
 	b.WriteString("Нажмите ESC для возврата к списку...")
 	return b.String()
 }
