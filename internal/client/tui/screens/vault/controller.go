@@ -60,10 +60,10 @@ func handleListState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 			}
 		case tea.KeyRunes:
 			switch msg.String() {
-			case "u":
+			case "u", "г":
 				m.state = ProcessingState
 				return m, m.loadItems()
-			case "n":
+			case "n", "т":
 				return m, func() tea.Msg { return AddItemReqMsg{User: m.user} }
 			}
 		}
