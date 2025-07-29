@@ -106,7 +106,11 @@ func (m Model) initUpdate() tea.Cmd {
 			}
 			s = UpdatePassword
 		case models.TypeCard:
-
+			err := m.cardModel.SetStartData(m.info, m.content)
+			if err != nil {
+				return ErrorMsg{err}
+			}
+			s = UpdateCard
 		case models.TypeText:
 
 		case models.TypeBinary:

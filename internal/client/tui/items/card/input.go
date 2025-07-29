@@ -98,9 +98,34 @@ func (m Model) send() tea.Cmd {
 			return messages.ErrMsg{Err: err}
 		}
 
+		m.Inputs[0].Reset()
+		m.Inputs[1].Reset()
+		m.Inputs[2].Reset()
+		m.Inputs[3].Reset()
+		m.Inputs[4].Reset()
+		m.Inputs[5].Reset()
+
 		return messages.ItemMsg{
 			Info:    info,
 			Content: content,
 		}
 	}
+}
+
+func (m *Model) SetStartData(info *models.ItemInfo, content []byte) error {
+	var card Card
+
+	err := json.Unmarshal(content, &card)
+	if err != nil {
+		return err
+	}
+
+	m.Inputs[0].SetValue(info.Name)
+	m.Inputs[1].SetValue(info.Metadata)
+	m.Inputs[2].SetValue(card.CardNumber)
+	m.Inputs[3].SetValue(card.CardOwner)
+	m.Inputs[4].SetValue(card.ExpiryDate)
+	m.Inputs[5].SetValue(card.CVV)
+
+	return nil
 }
