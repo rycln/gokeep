@@ -95,7 +95,20 @@ func (s *ItemStorage) DeleteItem(ctx context.Context, id models.ItemID) error {
 	return nil
 }
 
-// доделать
 func (s *ItemStorage) UpdateItem(ctx context.Context, info *models.ItemInfo, content []byte) error {
+	_, err := s.db.ExecContext(
+		ctx,
+		sqlUpdateItem,
+		info.Name,
+		info.Metadata,
+		info.UpdatedAt,
+		content,
+		info.UserID,
+		info.ID,
+	)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

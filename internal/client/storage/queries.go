@@ -40,3 +40,12 @@ const sqlDeleteItem = `
 	DELETE FROM items
 	WHERE id = $1
 `
+
+const sqlUpdateItem = `
+	UPDATE items
+	SET name = $1,
+		metadata = $2,
+		updated_at = $3,
+		encrypt_content = $4
+	WHERE user_id = $5 AND id = $6 
+`
