@@ -118,7 +118,11 @@ func (m Model) initUpdate() tea.Cmd {
 			}
 			s = UpdateText
 		case models.TypeBinary:
-
+			err := m.binModel.SetStartData(m.info, m.content)
+			if err != nil {
+				return ErrorMsg{err}
+			}
+			s = UpdateBinary
 		}
 
 		return InitSuccessMsg{state: s}
