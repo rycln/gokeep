@@ -22,9 +22,8 @@ func (m Model) Init() tea.Cmd {
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case messages.ItemMsg:
-		info := msg.Info
 		m.state = ProcessingState
-		return m, m.update(info, msg.Content)
+		return m, m.update(msg.Info, msg.Content)
 	case messages.ErrMsg:
 		m.errMsg = msg.Err.Error()
 		m.state = ErrorState
@@ -79,6 +78,9 @@ func (m Model) update(info *models.ItemInfo, content []byte) tea.Cmd {
 	return func() tea.Msg {
 		ctx, cancel := context.WithTimeout(context.Background(), m.timeout)
 		defer cancel()
+
+		info.ID = m.info.ID
+		info.UserID = m.info.UserID
 
 		err := m.service.Update(ctx, info, content)
 		if err != nil {

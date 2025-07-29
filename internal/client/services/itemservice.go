@@ -63,5 +63,6 @@ func (s *ItemService) Delete(ctx context.Context, id models.ItemID) error {
 }
 
 func (s *ItemService) Update(ctx context.Context, info *models.ItemInfo, content []byte) error {
+	info.UpdatedAt = time.Now()
 	return s.storage.UpdateItem(ctx, info, content)
 }
