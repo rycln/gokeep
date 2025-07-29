@@ -6,7 +6,9 @@ import (
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/rycln/gokeep/internal/client/tui/items/card"
 	"github.com/rycln/gokeep/internal/client/tui/items/logpass"
+	"github.com/rycln/gokeep/internal/client/tui/items/text"
 	"github.com/rycln/gokeep/internal/shared/models"
 )
 
@@ -124,6 +126,16 @@ func (m Model) getContent() tea.Cmd {
 		switch m.selected.ItemType {
 		case models.TypePassword:
 			content, err = logpass.GetContentRender(contentBytes)
+			if err != nil {
+				return ErrorMsg{Err: err}
+			}
+		case models.TypeCard:
+			content, err = card.GetContentRender(contentBytes)
+			if err != nil {
+				return ErrorMsg{Err: err}
+			}
+		case models.TypeText:
+			content, err = text.GetContentRender(contentBytes)
 			if err != nil {
 				return ErrorMsg{Err: err}
 			}
