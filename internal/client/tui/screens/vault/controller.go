@@ -6,6 +6,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/rycln/gokeep/internal/client/tui/items/bin"
 	"github.com/rycln/gokeep/internal/client/tui/items/card"
 	"github.com/rycln/gokeep/internal/client/tui/items/logpass"
 	"github.com/rycln/gokeep/internal/client/tui/items/text"
@@ -33,6 +34,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return handleDetailState(m, msg)
 	case ProcessingState:
 		return handleProcessingState(m, msg)
+	case BinaryInputState:
+		return handleBinaryInputState(m, msg)
 	}
 
 	var cmd tea.Cmd
@@ -104,6 +107,11 @@ func handleDetailState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 			m.state = UpdateState
 			m.selected = nil
 		case tea.KeyEnter:
+			if m.selected.ItemType == models.TypeBinary {
+				m.state = BinaryInputState
+				m.input = ""
+				return m, nil
+			}
 			m.state = ProcessingState
 			return m, m.getContent()
 		}
@@ -139,6 +147,11 @@ func (m Model) getContent() tea.Cmd {
 			if err != nil {
 				return ErrorMsg{Err: err}
 			}
+		case models.TypeBinary:
+			content, err = bin.UploadFile(m.input, contentBytes)
+			if err != nil {
+				return ErrorMsg{Err: err}
+			}
 		}
 
 		return ContentMsg{Content: content}
@@ -162,6 +175,25 @@ func handleProcessingState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 	case ContentMsg:
 		m.selected.Content = msg.Content
 		m.state = DetailState
+	}
+
+	return m, nil
+}
+
+func handleBinaryInputState(m Model, msg tea.Msg) (Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.Type {
+		case tea.KeyEnter:
+			m.state = ProcessingState
+			return m, m.getContent()
+		case tea.KeyBackspace:
+			if len(m.input) > 0 {
+				m.input = m.input[:len(m.input)-1]
+			}
+		case tea.KeyRunes:
+			m.input += msg.String()
+		}
 	}
 
 	return m, nil

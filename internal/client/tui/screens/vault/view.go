@@ -24,6 +24,11 @@ func (m Model) View() string {
 		return m.listView()
 	case DetailState:
 		return m.detailView()
+	case BinaryInputState:
+		return fmt.Sprintf(
+			"Введите путь сохранения файла:\n\n%s\n\nНажмите ENTER для подтверждения",
+			m.input,
+		)
 	case ErrorState:
 		return errorStyle.Render("Ошибка: " + m.errMsg + "\n" + "Нажмите Enter для продолжения...")
 	default:

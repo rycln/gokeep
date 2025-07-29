@@ -15,16 +15,16 @@ const (
 	ListState state = iota
 	DetailState
 	UpdateState
+	BinaryInputState
 	ProcessingState
 	ErrorState
 )
 
 type (
-	AddItemReqMsg    struct{ User *models.User }
-	GetContentReqMsg struct{}
-	ItemsMsg         struct{ Items []itemRender }
-	ContentMsg       struct{ Content string }
-	ErrorMsg         struct{ Err error }
+	AddItemReqMsg struct{ User *models.User }
+	ItemsMsg      struct{ Items []itemRender }
+	ContentMsg    struct{ Content string }
+	ErrorMsg      struct{ Err error }
 )
 
 type itemGetter interface {
@@ -49,6 +49,7 @@ func (i itemRender) Description() string {
 
 type Model struct {
 	state    state
+	input    string
 	selected *itemRender
 	items    []itemRender
 	list     list.Model
