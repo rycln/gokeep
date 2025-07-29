@@ -56,8 +56,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.binModel = binModel
 			}
 			return m, cmd
-		case ErrorState:
-			return handleErrorState(m, msg)
 		default:
 			switch m.state {
 			case LoadState:

@@ -57,22 +57,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return m, cmd
 		default:
-			switch msg := msg.(type) {
-			case tea.KeyMsg:
-				if msg.Type == tea.KeyCtrlC {
-					return m, tea.Quit
-				}
-				return m.handleKeyMsg(msg)
-
-			case ErrorMsg:
-				m.errMsg = msg.Err.Error()
-				m.state = ErrorState
-				return m, nil
-
-			case AddSuccessMsg:
-				m.state = SelectState
-				return m, nil
-
+			switch m.state {
+			case SelectState:
+				return handleSelectState(m, msg)
+			case ProcessingState:
+				return handleProcessingState(m, msg)
+			case ErrorState:
+				return handleErrorState(m, msg)
 			default:
 				return m, nil
 			}
@@ -80,9 +71,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 }
 
-func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
-	switch m.state {
-	case SelectState:
+func handleSelectState(m Model, msg tea.Msg) (Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
 		switch msg.Type {
 		case tea.KeyEsc:
 			return m, func() tea.Msg { return CancelMsg{} }
@@ -107,10 +98,36 @@ func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd) {
 				m.state = AddBinary
 			}
 		}
+	}
 
-	case ErrorState:
-		if msg.Type == tea.KeyEnter {
-			m.state = SelectState
+	return m, nil
+}
+
+func handleProcessingState(m Model, msg tea.Msg) (Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.Type {
+		case tea.KeyCtrlC:
+			return m, tea.Quit
+		}
+	case ErrorMsg:
+		m.errMsg = msg.Err.Error()
+		m.state = ErrorState
+		return m, nil
+	case AddSuccessMsg:
+		m.state = SelectState
+		return m, nil
+	}
+
+	return m, nil
+}
+
+func handleErrorState(m Model, msg tea.Msg) (Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.Type {
+		case tea.KeyEnter:
+			return m, func() tea.Msg { return CancelMsg{} }
 		}
 	}
 
