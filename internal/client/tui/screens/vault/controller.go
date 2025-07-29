@@ -119,6 +119,8 @@ func handleDetailState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 		case tea.KeyDelete:
 			m.state = ProcessingState
 			return m, m.deleteItem()
+		case tea.KeyInsert:
+			return m, m.updateItem()
 		}
 	}
 
@@ -174,6 +176,32 @@ func (m Model) deleteItem() tea.Cmd {
 		}
 
 		return DeleteSuccessMsg{}
+	}
+}
+
+func (m Model) updateItem() tea.Cmd {
+	return func() tea.Msg {
+		ctx, cancel := context.WithTimeout(context.Background(), m.timeout)
+		defer cancel()
+
+		contentBytes, err := m.service.GetContent(ctx, m.selected.ID)
+		if err != nil {
+			return ErrorMsg{Err: err}
+		}
+
+		info := &models.ItemInfo{
+			ID:        m.selected.ID,
+			UserID:    m.user.ID,
+			ItemType:  m.selected.ItemType,
+			Name:      m.selected.Name,
+			Metadata:  m.selected.Metadata,
+			UpdatedAt: m.selected.UpdatedAt,
+		}
+
+		return UpdateReqMsg{
+			Info:    info,
+			Content: contentBytes,
+		}
 	}
 }
 

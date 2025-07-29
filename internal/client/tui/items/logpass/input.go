@@ -87,9 +87,30 @@ func (m Model) send() tea.Cmd {
 			return messages.ErrMsg{Err: err}
 		}
 
+		m.Inputs[0].Reset()
+		m.Inputs[1].Reset()
+		m.Inputs[2].Reset()
+		m.Inputs[3].Reset()
+
 		return messages.ItemMsg{
 			Info:    info,
 			Content: content,
 		}
 	}
+}
+
+func (m *Model) SetStartData(info *models.ItemInfo, content []byte) error {
+	var logPass LogPass
+
+	err := json.Unmarshal(content, &logPass)
+	if err != nil {
+		return err
+	}
+
+	m.Inputs[0].SetValue(info.Name)
+	m.Inputs[1].SetValue(info.Metadata)
+	m.Inputs[2].SetValue(logPass.Login)
+	m.Inputs[3].SetValue(logPass.Password)
+
+	return nil
 }

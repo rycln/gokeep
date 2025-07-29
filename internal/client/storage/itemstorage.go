@@ -94,3 +94,8 @@ func (s *ItemStorage) DeleteItem(ctx context.Context, id models.ItemID) error {
 
 	return nil
 }
+
+// доделать
+func (s *ItemStorage) UpdateItem(ctx context.Context, info *models.ItemInfo, content []byte) error {
+	return nil
+}

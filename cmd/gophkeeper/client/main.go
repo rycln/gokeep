@@ -15,6 +15,7 @@ import (
 	"github.com/rycln/gokeep/internal/client/tui"
 	"github.com/rycln/gokeep/internal/client/tui/screens/add"
 	"github.com/rycln/gokeep/internal/client/tui/screens/auth"
+	"github.com/rycln/gokeep/internal/client/tui/screens/update"
 	"github.com/rycln/gokeep/internal/client/tui/screens/vault"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -61,8 +62,9 @@ func main() {
 	authScreen := auth.InitialModel(authService, timeout)
 	vaultScreen := vault.InitialModel(itemService, timeout)
 	addScreen := add.InitialModel(itemService, timeout)
+	updateScreen := update.InitialModel(itemService, timeout)
 
-	p := tea.NewProgram(tui.InitialRootModel(authScreen, vaultScreen, addScreen))
+	p := tea.NewProgram(tui.InitialRootModel(authScreen, vaultScreen, addScreen, updateScreen))
 	if _, err := p.Run(); err != nil {
 		os.Exit(1)
 	}

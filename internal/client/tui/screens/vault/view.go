@@ -49,6 +49,7 @@ func (m Model) detailView() string {
 	}
 	b.WriteString("Нажмите ENTER для загрузки данных...\n\n")
 	b.WriteString("Нажмите DEL для удаления данных...\n\n")
+	b.WriteString("Нажмите INS для редактирования данных...\n\n")
 	b.WriteString("Нажмите ESC для возврата к списку...")
 	return b.String()
 }

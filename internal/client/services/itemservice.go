@@ -21,10 +21,15 @@ type itemDeleter interface {
 	DeleteItem(context.Context, models.ItemID) error
 }
 
+type itemUpdater interface {
+	UpdateItem(context.Context, *models.ItemInfo, []byte) error
+}
+
 type itemStorage interface {
 	itemStorer
 	itemGetter
 	itemDeleter
+	itemUpdater
 }
 
 type ItemService struct {
@@ -55,4 +60,8 @@ func (s *ItemService) GetContent(ctx context.Context, id models.ItemID) ([]byte,
 
 func (s *ItemService) Delete(ctx context.Context, id models.ItemID) error {
 	return s.storage.DeleteItem(ctx, id)
+}
+
+func (s *ItemService) Update(ctx context.Context, info *models.ItemInfo, content []byte) error {
+	return s.storage.UpdateItem(ctx, info, content)
 }

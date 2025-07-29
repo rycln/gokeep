@@ -3,6 +3,7 @@ package tui
 import (
 	"github.com/rycln/gokeep/internal/client/tui/screens/add"
 	"github.com/rycln/gokeep/internal/client/tui/screens/auth"
+	"github.com/rycln/gokeep/internal/client/tui/screens/update"
 	"github.com/rycln/gokeep/internal/client/tui/screens/vault"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -14,21 +15,24 @@ const (
 	AuthModel model = iota
 	VaultModel
 	AddModel
+	UpdateModel
 )
 
 type rootModel struct {
-	authModel  auth.Model
-	vaultModel vault.Model
-	addModel   add.Model
-	current    model
+	authModel   auth.Model
+	vaultModel  vault.Model
+	addModel    add.Model
+	updateModel update.Model
+	current     model
 }
 
-func InitialRootModel(auth auth.Model, vault vault.Model, add add.Model) rootModel {
+func InitialRootModel(auth auth.Model, vault vault.Model, add add.Model, update update.Model) rootModel {
 	return rootModel{
-		authModel:  auth,
-		vaultModel: vault,
-		addModel:   add,
-		current:    AuthModel,
+		authModel:   auth,
+		vaultModel:  vault,
+		addModel:    add,
+		updateModel: update,
+		current:     AuthModel,
 	}
 }
 
@@ -46,7 +50,11 @@ func (m rootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.addModel.SetUser(msg.User)
 		m.current = AddModel
 		return m, nil
-	case add.CancelMsg:
+	case vault.UpdateReqMsg:
+		m.updateModel.SetItem(msg.Info, msg.Content)
+		m.current = UpdateModel
+		return m, nil
+	case add.CancelMsg, update.CancelMsg:
 		m.vaultModel.SetUpdateState()
 		m.current = VaultModel
 		return m, nil
@@ -70,6 +78,12 @@ func (m rootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.addModel = addModel
 			}
 			return m, cmd
+		case UpdateModel:
+			updated, cmd := m.updateModel.Update(msg)
+			if updateModel, ok := updated.(update.Model); ok {
+				m.updateModel = updateModel
+			}
+			return m, cmd
 		default:
 			return m, nil
 		}
@@ -84,6 +98,8 @@ func (m rootModel) View() string {
 		return m.vaultModel.View()
 	case AddModel:
 		return m.addModel.View()
+	case UpdateModel:
+		return m.updateModel.View()
 	default:
 		return ""
 	}

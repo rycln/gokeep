@@ -21,7 +21,11 @@ const (
 )
 
 type (
-	AddItemReqMsg    struct{ User *models.User }
+	AddItemReqMsg struct{ User *models.User }
+	UpdateReqMsg  struct {
+		Info    *models.ItemInfo
+		Content []byte
+	}
 	DeleteSuccessMsg struct{}
 	ItemsMsg         struct{ Items []itemRender }
 	ContentMsg       struct{ Content string }
