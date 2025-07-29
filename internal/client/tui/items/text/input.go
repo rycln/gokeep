@@ -83,9 +83,28 @@ func (m Model) send() tea.Cmd {
 			return messages.ErrMsg{Err: err}
 		}
 
+		m.Inputs[0].Reset()
+		m.Inputs[1].Reset()
+		m.Inputs[2].Reset()
+
 		return messages.ItemMsg{
 			Info:    info,
 			Content: content,
 		}
 	}
+}
+
+func (m *Model) SetStartData(info *models.ItemInfo, content []byte) error {
+	var text Text
+
+	err := json.Unmarshal(content, &text)
+	if err != nil {
+		return err
+	}
+
+	m.Inputs[0].SetValue(info.Name)
+	m.Inputs[1].SetValue(info.Metadata)
+	m.Inputs[2].SetValue(text.Content)
+
+	return nil
 }

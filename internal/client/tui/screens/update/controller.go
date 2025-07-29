@@ -112,7 +112,11 @@ func (m Model) initUpdate() tea.Cmd {
 			}
 			s = UpdateCard
 		case models.TypeText:
-
+			err := m.textModel.SetStartData(m.info, m.content)
+			if err != nil {
+				return ErrorMsg{err}
+			}
+			s = UpdateText
 		case models.TypeBinary:
 
 		}
