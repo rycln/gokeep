@@ -127,7 +127,8 @@ func handleErrorState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.Type {
 		case tea.KeyEnter:
-			return m, func() tea.Msg { return CancelMsg{} }
+			m.state = SelectState
+			return m, nil
 		}
 	}
 
