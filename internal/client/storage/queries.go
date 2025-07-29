@@ -5,7 +5,7 @@ const sqlCreateItemsTable = `
 		id TEXT PRIMARY KEY,
 		user_id TEXT NOT NULL,
 		type TEXT NOT NULL,
-		name TEXT NOT NULL UNIQUE,
+		name TEXT NOT NULL,
 		encrypt_content BLOB NOT NULL,
 		metadata TEXT,
 		updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
