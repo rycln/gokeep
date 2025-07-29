@@ -26,7 +26,7 @@ func (m Model) View() string {
 		return m.detailView()
 	case BinaryInputState:
 		return fmt.Sprintf(
-			"Введите путь сохранения файла:\n\n%s\n\nНажмите ENTER для подтверждения",
+			"Введите путь сохранения файла:\n\n>%s\n\nНажмите ENTER для подтверждения",
 			m.input,
 		)
 	case ErrorState:
