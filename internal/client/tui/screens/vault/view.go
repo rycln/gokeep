@@ -4,54 +4,42 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/charmbracelet/bubbles/list"
-	"github.com/charmbracelet/lipgloss"
-)
-
-var (
-	errorStyle      = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
-	titleStyle      = lipgloss.NewStyle().MarginLeft(2)
-	paginationStyle = list.DefaultStyles().PaginationStyle.PaddingLeft(4)
+	"github.com/rycln/gokeep/internal/client/tui/shared/i18n"
+	"github.com/rycln/gokeep/internal/client/tui/shared/styles"
 )
 
 func (m Model) View() string {
 	switch m.state {
 	case UpdateState:
-		return "Нажмите любую клавишу..."
+		return i18n.CommonPressAnyKey
 	case ProcessingState:
-		return "Пожалуйста, подождите..."
+		return i18n.CommonWait
 	case ListState:
 		return m.listView()
 	case DetailState:
 		return m.detailView()
 	case BinaryInputState:
-		return fmt.Sprintf(
-			"Введите путь сохранения файла:\n\n>%s\n\nНажмите ENTER для подтверждения",
-			m.input,
-		)
+		return fmt.Sprintf(i18n.InputSavePathPrompt, m.input)
 	case ErrorState:
-		return errorStyle.Render("Ошибка: " + m.errMsg + "\n" + "Нажмите Enter для продолжения...")
+		return styles.ErrorStyle.Render(fmt.Sprintf(i18n.CommonError, m.errMsg))
 	default:
 		return ""
 	}
 }
 
-func (m Model) listView() string {
-	return m.list.View()
-}
-
 func (m Model) detailView() string {
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("Объект: %s\n", m.selected.Name))
-	b.WriteString(fmt.Sprintf("Тип: %s\n", m.selected.ItemType))
-	b.WriteString(fmt.Sprintf("Описание: %s\n", m.selected.Metadata))
-	b.WriteString(fmt.Sprintf("Дата последнего обновления: %s\n\n", m.selected.UpdatedAt.String()))
+	b.WriteString(fmt.Sprintf(i18n.VaultObjectTitle, m.selected.Name) + "\n")
+	b.WriteString(fmt.Sprintf(i18n.VaultTypeTitle, m.selected.ItemType) + "\n")
+	b.WriteString(fmt.Sprintf(i18n.VaultDescTitle, m.selected.Metadata) + "\n")
+	b.WriteString(fmt.Sprintf(i18n.VaultUpdatedTitle, m.selected.UpdatedAt.String()))
 	if m.selected.Content != "" {
 		b.WriteString(m.selected.Content + "\n")
 	}
-	b.WriteString("Нажмите ENTER для загрузки данных...\n")
-	b.WriteString("Нажмите DEL для удаления данных...\n")
-	b.WriteString("Нажмите INS для редактирования данных...\n")
-	b.WriteString("Нажмите ESC для возврата к списку...")
+	b.WriteString(i18n.VaultActions)
 	return b.String()
+}
+
+func (m Model) listView() string {
+	return m.list.View()
 }

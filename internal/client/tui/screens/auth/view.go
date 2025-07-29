@@ -4,24 +4,16 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/charmbracelet/lipgloss"
-)
-
-var (
-	titleStyle   = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("63"))
-	errorStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
-	inputStyle   = lipgloss.NewStyle().PaddingLeft(1)
-	focusedStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("212"))
-	buttonStyle  = lipgloss.NewStyle().Padding(0, 3).Background(lipgloss.Color("62")).Foreground(lipgloss.Color("230"))
-	activeButton = lipgloss.NewStyle().Background(lipgloss.Color("69"))
+	"github.com/rycln/gokeep/internal/client/tui/shared/i18n"
+	"github.com/rycln/gokeep/internal/client/tui/shared/styles"
 )
 
 func (m Model) View() string {
 	switch m.state {
 	case ProcessingState:
-		return "Пожалуйста, подождите..."
+		return i18n.CommonWait
 	case ErrorState:
-		return errorStyle.Render("Ошибка: " + m.errMsg + "\n" + "Нажмите Enter для продолжения...")
+		return styles.ErrorStyle.Render(fmt.Sprintf(i18n.CommonError, m.errMsg))
 	default:
 		return renderAuthForm(m)
 	}
@@ -30,36 +22,36 @@ func (m Model) View() string {
 func renderAuthForm(m Model) string {
 	var title string
 	if m.state == LoginState {
-		title = "Вход в GophKeeper"
+		title = i18n.AuthLoginTitle
 	} else {
-		title = "Регистрация"
+		title = i18n.AuthRegisterTitle
 	}
 
-	usernameInput := inputStyle.Render("Логин: " + m.username)
-	passwordInput := inputStyle.Render("Пароль: " + maskPassword(m.password))
+	usernameInput := styles.InputStyle.Render(fmt.Sprintf(i18n.AuthUsernameLabel, m.username))
+	passwordInput := styles.InputStyle.Render(fmt.Sprintf(i18n.AuthPasswordLabel, maskPassword(m.password)))
 
 	if m.activeField == UsernameField {
-		usernameInput = focusedStyle.Render("> Логин: " + m.username)
+		usernameInput = styles.FocusedStyle.Render("> " + fmt.Sprintf(i18n.AuthUsernameLabel, m.username))
 	} else {
-		passwordInput = focusedStyle.Render("> Пароль: " + maskPassword(m.password))
+		passwordInput = styles.FocusedStyle.Render("> " + fmt.Sprintf(i18n.AuthPasswordLabel, maskPassword(m.password)))
 	}
 
-	loginBtn := buttonStyle.Render("Вход")
-	registerBtn := buttonStyle.Render("Регистрация")
+	loginBtn := styles.ButtonStyle.Render(i18n.AuthLoginButton)
+	registerBtn := styles.ButtonStyle.Render(i18n.AuthRegisterButton)
 	if m.state == LoginState {
-		loginBtn = activeButton.Render("Вход")
+		loginBtn = styles.ActiveButton.Render(i18n.AuthLoginButton)
 	} else {
-		registerBtn = activeButton.Render("Регистрация")
+		registerBtn = styles.ActiveButton.Render(i18n.AuthRegisterButton)
 	}
 
 	return fmt.Sprintf(
 		"%s\n\n%s\n%s\n\n%s %s\n\n%s",
-		titleStyle.Render(title),
+		styles.TitleStyle.Render(title),
 		usernameInput,
 		passwordInput,
 		loginBtn,
 		registerBtn,
-		"Нажмите Enter для подтверждения, Tab для переключения",
+		i18n.AuthTabHint,
 	)
 }
 

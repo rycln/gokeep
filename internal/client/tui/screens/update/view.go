@@ -1,17 +1,18 @@
 package update
 
 import (
-	"github.com/charmbracelet/lipgloss"
-)
+	"fmt"
 
-var errorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
+	"github.com/rycln/gokeep/internal/client/tui/shared/i18n"
+	"github.com/rycln/gokeep/internal/client/tui/shared/styles"
+)
 
 func (m Model) View() string {
 	switch m.state {
 	case LoadState:
-		return "Нажмите любую клавишу..."
+		return i18n.CommonPressAnyKey
 	case ProcessingState:
-		return "Пожалуйста, подождите..."
+		return i18n.CommonWait
 	case UpdatePassword:
 		return m.logpassModel.View()
 	case UpdateCard:
@@ -28,5 +29,5 @@ func (m Model) View() string {
 }
 
 func (m Model) errorView() string {
-	return errorStyle.Render("Ошибка: " + m.errMsg + "\n" + "Нажмите Enter для продолжения...")
+	return styles.ErrorStyle.Render(fmt.Sprintf(i18n.CommonError, m.errMsg))
 }

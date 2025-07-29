@@ -2,18 +2,18 @@ package add
 
 import (
 	"fmt"
+	"strings"
 
-	"github.com/charmbracelet/lipgloss"
+	"github.com/rycln/gokeep/internal/client/tui/shared/i18n"
+	"github.com/rycln/gokeep/internal/client/tui/shared/styles"
 )
-
-var errorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
 
 func (m Model) View() string {
 	switch m.state {
 	case SelectState:
 		return m.selectView()
 	case ProcessingState:
-		return "Пожалуйста, подождите..."
+		return i18n.CommonWait
 	case AddPassword:
 		return m.logpassModel.View()
 	case AddCard:
@@ -30,22 +30,19 @@ func (m Model) View() string {
 }
 
 func (m Model) selectView() string {
-	s := "Выберите тип хранимой информации:\n\n"
-
+	var b strings.Builder
+	b.WriteString(i18n.AddSelectPrompt)
 	for i, choice := range m.choices {
 		cursor := " "
 		if m.cursor == i {
 			cursor = ">"
 		}
-
-		s += fmt.Sprintf("%s %s\n", cursor, choice)
+		b.WriteString(fmt.Sprintf(i18n.AddChoiceTemplate, cursor, choice))
 	}
-
-	s += "\nДля отмены нажмите ESC..."
-
-	return s
+	b.WriteString("\n" + i18n.CommonPressESC)
+	return b.String()
 }
 
 func (m Model) errorView() string {
-	return errorStyle.Render("Ошибка: " + m.errMsg + "\n" + "Нажмите Enter для продолжения...")
+	return styles.ErrorStyle.Render(fmt.Sprintf(i18n.CommonError, m.errMsg))
 }
