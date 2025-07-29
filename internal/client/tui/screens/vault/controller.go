@@ -34,6 +34,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return handleDetailState(m, msg)
 	case ProcessingState:
 		return handleProcessingState(m, msg)
+	case ErrorState:
+		return handleErrorState(m, msg)
 	case BinaryInputState:
 		return handleBinaryInputState(m, msg)
 	}
@@ -193,6 +195,18 @@ func handleBinaryInputState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 			}
 		case tea.KeyRunes:
 			m.input += msg.String()
+		}
+	}
+
+	return m, nil
+}
+
+func handleErrorState(m Model, msg tea.Msg) (Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.Type {
+		case tea.KeyEnter:
+			m.state = ListState
 		}
 	}
 
