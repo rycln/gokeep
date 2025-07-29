@@ -9,8 +9,8 @@
 *.test
 
 # Binaries
-client/cmd/gophkeeper/client
-server/cmd/gophkeeper/server
+client/cmd/gophkeeper/gophkeeper
+server/cmd/gophkeeper/gophkeeper
 
 # Dependency directories (remove the comment below to include it)
 vendor/
