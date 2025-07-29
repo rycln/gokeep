@@ -5,7 +5,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/rycln/gokeep/internal/client/tui/shared/i18n"
+	"github.com/rycln/gokeep/internal/client/tui/shared/styles"
 	"github.com/rycln/gokeep/internal/shared/models"
 )
 
@@ -74,12 +78,35 @@ type Model struct {
 }
 
 func InitialModel(service itemService, timeout time.Duration) Model {
-	l := list.New([]list.Item{}, list.NewDefaultDelegate(), 20, 20)
-	l.Title = "Goph Keeper"
-	l.Styles.Title = titleStyle
-	l.Styles.PaginationStyle = paginationStyle
+	delegate := list.NewDefaultDelegate()
+	delegate.Styles.SelectedTitle = delegate.Styles.SelectedTitle.
+		Border(lipgloss.ThickBorder(), false, false, false, true).
+		BorderForeground(lipgloss.Color("62")).
+		Foreground(lipgloss.Color("229"))
+	delegate.Styles.SelectedDesc = delegate.Styles.SelectedDesc.
+		Foreground(lipgloss.Color("245"))
+	delegate.ShortHelpFunc = func() []key.Binding {
+		return []key.Binding{
+			key.NewBinding(
+				key.WithKeys("n"),
+				key.WithHelp("n", "добавить"),
+			),
+			key.NewBinding(
+				key.WithKeys("u"),
+				key.WithHelp("u", "обновить"),
+			),
+		}
+	}
+
+	l := list.New([]list.Item{}, delegate, 20, 20)
+	l.Title = i18n.VaultTitle
+	l.Styles.Title = styles.TitleStyle
 	l.SetShowStatusBar(true)
 	l.SetFilteringEnabled(true)
+
+	l.StatusMessageLifetime = timeout
+
+	l.SetStatusBarItemName(i18n.VaultListTitleNameSingular, i18n.VaultListTitleNamePlural)
 
 	return Model{
 		state:   UpdateState,
