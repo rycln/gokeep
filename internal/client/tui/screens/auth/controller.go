@@ -16,9 +16,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case LoginState, RegisterState:
 		return handleAuthInput(m, msg)
 	case ProcessingState:
-		return handleProcessing(m, msg)
+		return handleProcessingState(m, msg)
 	case ErrorState:
-		return handleError(m, msg)
+		return handleErrorState(m, msg)
 	}
 
 	return m, nil
@@ -110,7 +110,7 @@ func (m Model) register() tea.Cmd {
 	}
 }
 
-func handleProcessing(m Model, msg tea.Msg) (Model, tea.Cmd) {
+func handleProcessingState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case LoginErrorMsg:
 		m.errMsg = msg.Err.Error()
@@ -125,7 +125,7 @@ func handleProcessing(m Model, msg tea.Msg) (Model, tea.Cmd) {
 	return m, nil
 }
 
-func handleError(m Model, msg tea.Msg) (Model, tea.Cmd) {
+func handleErrorState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.Type {
