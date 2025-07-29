@@ -21,15 +21,25 @@ const (
 )
 
 type (
-	AddItemReqMsg struct{ User *models.User }
-	ItemsMsg      struct{ Items []itemRender }
-	ContentMsg    struct{ Content string }
-	ErrorMsg      struct{ Err error }
+	AddItemReqMsg    struct{ User *models.User }
+	DeleteSuccessMsg struct{}
+	ItemsMsg         struct{ Items []itemRender }
+	ContentMsg       struct{ Content string }
+	ErrorMsg         struct{ Err error }
 )
 
 type itemGetter interface {
 	List(context.Context, models.UserID) ([]models.ItemInfo, error)
 	GetContent(context.Context, models.ItemID) ([]byte, error)
+}
+
+type itemDeleter interface {
+	Delete(context.Context, models.ItemID) error
+}
+
+type itemService interface {
+	itemGetter
+	itemDeleter
 }
 
 type itemRender struct {
@@ -54,12 +64,12 @@ type Model struct {
 	items    []itemRender
 	list     list.Model
 	errMsg   string
-	service  itemGetter
+	service  itemService
 	user     *models.User
 	timeout  time.Duration
 }
 
-func InitialModel(service itemGetter, timeout time.Duration) Model {
+func InitialModel(service itemService, timeout time.Duration) Model {
 	l := list.New([]list.Item{}, list.NewDefaultDelegate(), 20, 20)
 	l.Title = "Goph Keeper"
 	l.Styles.Title = titleStyle

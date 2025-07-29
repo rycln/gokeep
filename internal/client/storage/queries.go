@@ -35,3 +35,8 @@ const sqlGetUserItemsInfo = `
 	FROM items
 	WHERE user_id = $1
 `
+
+const sqlDeleteItem = `
+	DELETE FROM items
+	WHERE id = $1
+`

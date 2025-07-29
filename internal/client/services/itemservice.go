@@ -17,9 +17,14 @@ type itemGetter interface {
 	GetContent(context.Context, models.ItemID) ([]byte, error)
 }
 
+type itemDeleter interface {
+	DeleteItem(context.Context, models.ItemID) error
+}
+
 type itemStorage interface {
 	itemStorer
 	itemGetter
+	itemDeleter
 }
 
 type ItemService struct {
@@ -46,4 +51,8 @@ func (s *ItemService) List(ctx context.Context, uid models.UserID) ([]models.Ite
 // добавить дешифровку
 func (s *ItemService) GetContent(ctx context.Context, id models.ItemID) ([]byte, error) {
 	return s.storage.GetContent(ctx, id)
+}
+
+func (s *ItemService) Delete(ctx context.Context, id models.ItemID) error {
+	return s.storage.DeleteItem(ctx, id)
 }

@@ -85,3 +85,12 @@ func (s *ItemStorage) GetContent(ctx context.Context, id models.ItemID) ([]byte,
 
 	return content, nil
 }
+
+func (s *ItemStorage) DeleteItem(ctx context.Context, id models.ItemID) error {
+	_, err := s.db.ExecContext(ctx, sqlDeleteItem, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

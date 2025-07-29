@@ -106,7 +106,7 @@ func handleDetailState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 		case tea.KeyCtrlC:
 			return m, tea.Quit
 		case tea.KeyEsc, tea.KeyBackspace:
-			m.state = UpdateState
+			m.state = ListState
 			m.selected = nil
 		case tea.KeyEnter:
 			if m.selected.ItemType == models.TypeBinary {
@@ -116,6 +116,9 @@ func handleDetailState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 			}
 			m.state = ProcessingState
 			return m, m.getContent()
+		case tea.KeyDelete:
+			m.state = ProcessingState
+			return m, m.deleteItem()
 		}
 	}
 
@@ -160,6 +163,20 @@ func (m Model) getContent() tea.Cmd {
 	}
 }
 
+func (m Model) deleteItem() tea.Cmd {
+	return func() tea.Msg {
+		ctx, cancel := context.WithTimeout(context.Background(), m.timeout)
+		defer cancel()
+
+		err := m.service.Delete(ctx, m.selected.ID)
+		if err != nil {
+			return ErrorMsg{Err: err}
+		}
+
+		return DeleteSuccessMsg{}
+	}
+}
+
 func handleProcessingState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case ErrorMsg:
@@ -177,6 +194,8 @@ func handleProcessingState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 	case ContentMsg:
 		m.selected.Content = msg.Content
 		m.state = DetailState
+	case DeleteSuccessMsg:
+		m.state = UpdateState
 	}
 
 	return m, nil
