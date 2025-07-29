@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/rycln/gokeep/internal/shared/models"
+	"github.com/rycln/gokeep/shared/models"
 )
 
 var errNoUserID = errors.New("does not contain user id")
