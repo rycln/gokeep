@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -21,17 +20,7 @@ func NewUserStorage(db *sql.DB) *UserStorage {
 }
 
 func (s *UserStorage) AddUser(ctx context.Context, user *models.UserDB) error {
-	tx, err := s.db.Begin()
-	if err != nil {
-		return err
-	}
-	defer func() {
-		if rollbackErr := tx.Rollback(); rollbackErr != nil && !errors.Is(rollbackErr, sql.ErrTxDone) {
-			err = fmt.Errorf("%v; rollback failed: %w", err, rollbackErr)
-		}
-	}()
-
-	_, err = tx.ExecContext(ctx, sqlAddUser, user.ID, user.Username, user.PassHash)
+	_, err := s.db.ExecContext(ctx, sqlAddUser, user.ID, user.Username, user.PassHash)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
@@ -40,7 +29,7 @@ func (s *UserStorage) AddUser(ctx context.Context, user *models.UserDB) error {
 		return err
 	}
 
-	return tx.Commit()
+	return nil
 }
 
 func (s *UserStorage) GetUserByUsername(ctx context.Context, username string) (*models.UserDB, error) {

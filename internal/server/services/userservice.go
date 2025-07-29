@@ -44,7 +44,7 @@ func (s *UserService) CreateUser(ctx context.Context, req *models.UserAuthReq) (
 	uid := models.UserID(uuid.NewString())
 
 	userDB := &models.UserDB{
-		ID:       models.UserID(uuid.NewString()),
+		ID:       uid,
 		Username: req.Username,
 		PassHash: hash,
 	}
