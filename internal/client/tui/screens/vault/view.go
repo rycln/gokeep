@@ -43,13 +43,15 @@ func (m Model) listView() string {
 func (m Model) detailView() string {
 	var b strings.Builder
 	b.WriteString(fmt.Sprintf("Объект: %s\n", m.selected.Name))
-	b.WriteString(fmt.Sprintf("Тип: %s\n\n", m.selected.ItemType))
+	b.WriteString(fmt.Sprintf("Тип: %s\n", m.selected.ItemType))
+	b.WriteString(fmt.Sprintf("Описание: %s\n", m.selected.Metadata))
+	b.WriteString(fmt.Sprintf("Дата последнего обновления: %s\n\n", m.selected.UpdatedAt.String()))
 	if m.selected.Content != "" {
 		b.WriteString(m.selected.Content + "\n")
 	}
-	b.WriteString("Нажмите ENTER для загрузки данных...\n\n")
-	b.WriteString("Нажмите DEL для удаления данных...\n\n")
-	b.WriteString("Нажмите INS для редактирования данных...\n\n")
+	b.WriteString("Нажмите ENTER для загрузки данных...\n")
+	b.WriteString("Нажмите DEL для удаления данных...\n")
+	b.WriteString("Нажмите INS для редактирования данных...\n")
 	b.WriteString("Нажмите ESC для возврата к списку...")
 	return b.String()
 }
