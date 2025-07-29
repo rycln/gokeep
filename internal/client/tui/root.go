@@ -42,10 +42,43 @@ func (m rootModel) Init() tea.Cmd {
 
 func (m rootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case add.CancelMsg, update.CancelMsg:
+		m.vaultModel.SetUpdateState()
+		m.current = VaultModel
+		return m, nil
+	default:
+		switch m.current {
+		case AuthModel:
+			return handleAuthModel(m, msg)
+		case VaultModel:
+			return handleVaultModel(m, msg)
+		case AddModel:
+			return handleAddModel(m, msg)
+		case UpdateModel:
+			return handleUpdateModel(m, msg)
+		default:
+			return m, nil
+		}
+	}
+}
+
+func handleAuthModel(m rootModel, msg tea.Msg) (rootModel, tea.Cmd) {
+	switch msg := msg.(type) {
 	case auth.AuthSuccessMsg:
 		m.vaultModel.SetUser(msg.User)
 		m.current = VaultModel
 		return m, nil
+	default:
+		updated, cmd := m.authModel.Update(msg)
+		if authModel, ok := updated.(auth.Model); ok {
+			m.authModel = authModel
+		}
+		return m, cmd
+	}
+}
+
+func handleVaultModel(m rootModel, msg tea.Msg) (rootModel, tea.Cmd) {
+	switch msg := msg.(type) {
 	case vault.AddItemReqMsg:
 		m.addModel.SetUser(msg.User)
 		m.current = AddModel
@@ -54,39 +87,42 @@ func (m rootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.updateModel.SetItem(msg.Info, msg.Content)
 		m.current = UpdateModel
 		return m, nil
-	case add.CancelMsg, update.CancelMsg:
+	default:
+		updated, cmd := m.vaultModel.Update(msg)
+		if vaultModel, ok := updated.(vault.Model); ok {
+			m.vaultModel = vaultModel
+		}
+		return m, cmd
+	}
+}
+
+func handleAddModel(m rootModel, msg tea.Msg) (rootModel, tea.Cmd) {
+	switch msg := msg.(type) {
+	case add.CancelMsg:
 		m.vaultModel.SetUpdateState()
 		m.current = VaultModel
 		return m, nil
 	default:
-		switch m.current {
-		case AuthModel:
-			updated, cmd := m.authModel.Update(msg)
-			if authModel, ok := updated.(auth.Model); ok {
-				m.authModel = authModel
-			}
-			return m, cmd
-		case VaultModel:
-			updated, cmd := m.vaultModel.Update(msg)
-			if vaultModel, ok := updated.(vault.Model); ok {
-				m.vaultModel = vaultModel
-			}
-			return m, cmd
-		case AddModel:
-			updated, cmd := m.addModel.Update(msg)
-			if addModel, ok := updated.(add.Model); ok {
-				m.addModel = addModel
-			}
-			return m, cmd
-		case UpdateModel:
-			updated, cmd := m.updateModel.Update(msg)
-			if updateModel, ok := updated.(update.Model); ok {
-				m.updateModel = updateModel
-			}
-			return m, cmd
-		default:
-			return m, nil
+		updated, cmd := m.addModel.Update(msg)
+		if addModel, ok := updated.(add.Model); ok {
+			m.addModel = addModel
 		}
+		return m, cmd
+	}
+}
+
+func handleUpdateModel(m rootModel, msg tea.Msg) (rootModel, tea.Cmd) {
+	switch msg := msg.(type) {
+	case update.CancelMsg:
+		m.vaultModel.SetUpdateState()
+		m.current = VaultModel
+		return m, nil
+	default:
+		updated, cmd := m.updateModel.Update(msg)
+		if updateModel, ok := updated.(update.Model); ok {
+			m.updateModel = updateModel
+		}
+		return m, cmd
 	}
 }
 
