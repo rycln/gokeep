@@ -8,9 +8,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/signal"
 	"strings"
-	"syscall"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -89,36 +87,25 @@ func New() (*App, error) {
 }
 
 func (app *App) Run() error {
+	printBuildInfo()
+
+	shutdown := make(chan struct{}, 1)
+
 	go func() {
 		if _, err := app.tui.Run(); err != nil {
 			os.Exit(1)
 		}
+		close(shutdown)
 	}()
-
-	printBuildInfo()
-
-	shutdown := make(chan os.Signal, 1)
-	signal.Notify(shutdown, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 
 	<-shutdown
 
-	err := app.shutdown()
-	if err != nil {
-		return fmt.Errorf("shutdown error: %v", err)
-	}
-
-	err = app.cleanup()
+	err := app.cleanup()
 	if err != nil {
 		return fmt.Errorf("cleanup error: %v", err)
 	}
 
 	log.Println(strings.TrimPrefix(os.Args[0], "./") + " shutted down gracefully")
-
-	return nil
-}
-
-func (app *App) shutdown() error {
-	app.tui.Quit()
 
 	return nil
 }
