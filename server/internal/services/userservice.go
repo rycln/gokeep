@@ -7,6 +7,8 @@ import (
 	"github.com/rycln/gokeep/shared/models"
 )
 
+//go:generate mockgen -source=$GOFILE -destination=./mocks/mock_$GOFILE -package=mocks
+
 // userStorager defines persistence operations for user data
 type userStorager interface {
 	AddUser(context.Context, *models.UserDB) error
