@@ -8,6 +8,8 @@ import (
 	"github.com/rycln/gokeep/client/internal/tui/shared/styles"
 )
 
+// View renders the current authentication screen based on state.
+// Returns formatted UI with appropriate styling and localization.
 func (m Model) View() string {
 	switch m.state {
 	case ProcessingState:
@@ -19,21 +21,25 @@ func (m Model) View() string {
 	}
 }
 
+// renderAuthForm builds the authentication form UI
+// Includes username/password fields and mode toggle buttons
 func renderAuthForm(m Model) string {
-	var title string
+	title := i18n.AuthRegisterTitle
 	if m.state == LoginState {
 		title = i18n.AuthLoginTitle
-	} else {
-		title = i18n.AuthRegisterTitle
 	}
 
-	usernameInput := styles.InputStyle.Render(fmt.Sprintf(i18n.AuthUsernameLabel, m.username))
-	passwordInput := styles.InputStyle.Render(fmt.Sprintf(i18n.AuthPasswordLabel, maskPassword(m.password)))
+	usernameInput := styles.InputStyle.Render(
+		fmt.Sprintf(i18n.AuthUsernameLabel, m.username))
+	passwordInput := styles.InputStyle.Render(
+		fmt.Sprintf(i18n.AuthPasswordLabel, maskPassword(m.password)))
 
 	if m.activeField == UsernameField {
-		usernameInput = styles.FocusedStyle.Render("> " + fmt.Sprintf(i18n.AuthUsernameLabel, m.username))
+		usernameInput = styles.FocusedStyle.Render(
+			"> " + fmt.Sprintf(i18n.AuthUsernameLabel, m.username))
 	} else {
-		passwordInput = styles.FocusedStyle.Render("> " + fmt.Sprintf(i18n.AuthPasswordLabel, maskPassword(m.password)))
+		passwordInput = styles.FocusedStyle.Render(
+			"> " + fmt.Sprintf(i18n.AuthPasswordLabel, maskPassword(m.password)))
 	}
 
 	loginBtn := styles.ButtonStyle.Render(i18n.AuthLoginButton)
@@ -55,6 +61,7 @@ func renderAuthForm(m Model) string {
 	)
 }
 
+// maskPassword obscures password input for display
 func maskPassword(pwd string) string {
 	return strings.Repeat("•", len(pwd))
 }

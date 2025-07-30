@@ -3,21 +3,21 @@ package storage
 import (
 	"context"
 	"database/sql"
-	"fmt"
 
 	"github.com/rycln/gokeep/shared/models"
 )
 
+// ItemStorage handles persistent storage operations for items
 type ItemStorage struct {
-	db *sql.DB
+	db *sql.DB // Database connection
 }
 
+// NewItemStorage creates a new ItemStorage instance
 func NewItemStorage(db *sql.DB) *ItemStorage {
-	return &ItemStorage{
-		db: db,
-	}
+	return &ItemStorage{db: db}
 }
 
+// Add stores a new item with its content and metadata
 func (s *ItemStorage) Add(ctx context.Context, info *models.ItemInfo, content []byte) error {
 	_, err := s.db.ExecContext(
 		ctx,
@@ -29,72 +29,50 @@ func (s *ItemStorage) Add(ctx context.Context, info *models.ItemInfo, content []
 		content,
 		info.Metadata,
 	)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
-func (s *ItemStorage) ListByUser(ctx context.Context, uid models.UserID) (itemsinfo []models.ItemInfo, err error) {
+// ListByUser retrieves all item metadata for a specific user
+func (s *ItemStorage) ListByUser(ctx context.Context, uid models.UserID) ([]models.ItemInfo, error) {
 	rows, err := s.db.QueryContext(ctx, sqlGetUserItemsInfo, uid)
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		if rowsCloseErr := rows.Close(); rowsCloseErr != nil {
-			err = fmt.Errorf("%v; rows close failed: %w", err, rowsCloseErr)
-		}
-	}()
+	defer rows.Close()
 
+	var items []models.ItemInfo
 	for rows.Next() {
 		var info models.ItemInfo
-
-		err = rows.Scan(
+		if err := rows.Scan(
 			&info.ID,
 			&info.UserID,
 			&info.ItemType,
 			&info.Name,
 			&info.Metadata,
 			&info.UpdatedAt,
-		)
-		if err != nil {
+		); err != nil {
 			return nil, err
 		}
-
-		itemsinfo = append(itemsinfo, info)
+		items = append(items, info)
 	}
 
-	err = rows.Err()
-	if err != nil {
-		return nil, err
-	}
-
-	return itemsinfo, nil
+	return items, rows.Err()
 }
 
+// GetContent retrieves the encrypted content of a specific item
 func (s *ItemStorage) GetContent(ctx context.Context, id models.ItemID) ([]byte, error) {
-	row := s.db.QueryRowContext(ctx, sqlGetItemByID, id)
-
 	var content []byte
-
-	err := row.Scan(&content)
-	if err != nil {
-		return nil, err
-	}
-
-	return content, nil
+	err := s.db.QueryRowContext(ctx, sqlGetItemByID, id).Scan(&content)
+	return content, err
 }
 
+// DeleteItem removes an item from storage by its ID
 func (s *ItemStorage) DeleteItem(ctx context.Context, id models.ItemID) error {
 	_, err := s.db.ExecContext(ctx, sqlDeleteItem, id)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
+// UpdateItem modifies an existing item's data and content
 func (s *ItemStorage) UpdateItem(ctx context.Context, info *models.ItemInfo, content []byte) error {
 	_, err := s.db.ExecContext(
 		ctx,
@@ -106,9 +84,5 @@ func (s *ItemStorage) UpdateItem(ctx context.Context, info *models.ItemInfo, con
 		info.UserID,
 		info.ID,
 	)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }

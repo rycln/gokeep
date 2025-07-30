@@ -1,8 +1,10 @@
+// Package styles provides centralized UI styling definitions.
 package styles
 
 import "github.com/charmbracelet/lipgloss"
 
 var (
+	NoStyle      = lipgloss.NewStyle()
 	ErrorStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
 	TitleStyle   = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("63"))
 	InputStyle   = lipgloss.NewStyle().PaddingLeft(1)

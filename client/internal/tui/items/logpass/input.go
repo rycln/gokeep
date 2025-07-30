@@ -2,25 +2,22 @@ package logpass
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/rycln/gokeep/client/internal/tui/shared/i18n"
 	"github.com/rycln/gokeep/client/internal/tui/shared/input"
 	"github.com/rycln/gokeep/client/internal/tui/shared/messages"
 	"github.com/rycln/gokeep/shared/models"
 )
 
-const (
-	nameField     = "Название"
-	infoField     = "Информация"
-	loginField    = "Логин"
-	passwordField = "Пароль"
-)
-
+// Model represents a login/password entry form
 type Model struct {
-	input.Form
+	input.Form // Embedded form component
 }
 
+// InitialModel creates a new login/password form with configured fields
 func InitialModel() Model {
 	m := Model{
 		input.Form{
@@ -35,14 +32,14 @@ func InitialModel() Model {
 
 		switch i {
 		case 0:
-			t.Placeholder = nameField
+			t.Placeholder = i18n.InputName
 			t.Focus()
 		case 1:
-			t.Placeholder = infoField
+			t.Placeholder = i18n.InputInfo
 		case 2:
-			t.Placeholder = loginField
+			t.Placeholder = i18n.LogPassInputLogin
 		case 3:
-			t.Placeholder = passwordField
+			t.Placeholder = i18n.LogPassInputPassword
 			t.EchoMode = textinput.EchoPassword
 			t.EchoCharacter = '•'
 		}
@@ -53,6 +50,7 @@ func InitialModel() Model {
 	return m
 }
 
+// Update handles form input and submission events
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -69,6 +67,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
+// send packages form data into a message for processing
 func (m Model) send() tea.Cmd {
 	return func() tea.Msg {
 		info := &models.ItemInfo{
@@ -84,13 +83,12 @@ func (m Model) send() tea.Cmd {
 
 		content, err := json.Marshal(logpass)
 		if err != nil {
-			return messages.ErrMsg{Err: err}
+			return messages.ErrMsg{Err: fmt.Errorf("marshal error: %w", err)}
 		}
 
-		m.Inputs[0].Reset()
-		m.Inputs[1].Reset()
-		m.Inputs[2].Reset()
-		m.Inputs[3].Reset()
+		for i := range m.Inputs {
+			m.Inputs[i].Reset()
+		}
 
 		return messages.ItemMsg{
 			Info:    info,
@@ -99,12 +97,13 @@ func (m Model) send() tea.Cmd {
 	}
 }
 
+// SetStartData pre-populates form with existing credentials
 func (m *Model) SetStartData(info *models.ItemInfo, content []byte) error {
 	var logPass LogPass
 
 	err := json.Unmarshal(content, &logPass)
 	if err != nil {
-		return err
+		return fmt.Errorf("unmarshal error: %w", err)
 	}
 
 	m.Inputs[0].SetValue(info.Name)

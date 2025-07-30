@@ -8,6 +8,8 @@ import (
 	"github.com/rycln/gokeep/client/internal/tui/shared/styles"
 )
 
+// View renders the current state of the vault interface.
+// Returns different views based on the current state machine state.
 func (m Model) View() string {
 	switch m.state {
 	case UpdateState:
@@ -27,6 +29,8 @@ func (m Model) View() string {
 	}
 }
 
+// detailView renders the detailed view of a selected item.
+// Shows all item metadata and formatted content with action prompts.
 func (m Model) detailView() string {
 	var b strings.Builder
 	b.WriteString(fmt.Sprintf(i18n.VaultObjectTitle, m.selected.Name) + "\n")
@@ -40,6 +44,8 @@ func (m Model) detailView() string {
 	return b.String()
 }
 
+// listView renders the main items list view.
+// Uses the bubbletea list component for consistent list rendering.
 func (m Model) listView() string {
 	return m.list.View()
 }

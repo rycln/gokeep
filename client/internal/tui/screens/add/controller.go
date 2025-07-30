@@ -8,14 +8,17 @@ import (
 	"github.com/rycln/gokeep/client/internal/tui/items/card"
 	"github.com/rycln/gokeep/client/internal/tui/items/logpass"
 	"github.com/rycln/gokeep/client/internal/tui/items/text"
+	"github.com/rycln/gokeep/client/internal/tui/shared/i18n"
 	"github.com/rycln/gokeep/client/internal/tui/shared/messages"
 	"github.com/rycln/gokeep/shared/models"
 )
 
+// Init initializes the add item model
 func (m Model) Init() tea.Cmd {
 	return nil
 }
 
+// Update handles all messages and state transitions for item creation
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case messages.ItemMsg:
@@ -33,29 +36,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	default:
 		switch m.state {
 		case AddPassword:
-			updated, cmd := m.logpassModel.Update(msg)
-			if logpassModel, ok := updated.(logpass.Model); ok {
-				m.logpassModel = logpassModel
-			}
-			return m, cmd
+			return handleItemModelUpdate(m, msg, &m.logpassModel)
 		case AddCard:
-			updated, cmd := m.cardModel.Update(msg)
-			if cardModel, ok := updated.(card.Model); ok {
-				m.cardModel = cardModel
-			}
-			return m, cmd
+			return handleItemModelUpdate(m, msg, &m.cardModel)
 		case AddText:
-			updated, cmd := m.textModel.Update(msg)
-			if textModel, ok := updated.(text.Model); ok {
-				m.textModel = textModel
-			}
-			return m, cmd
+			return handleItemModelUpdate(m, msg, &m.textModel)
 		case AddBinary:
-			updated, cmd := m.binModel.Update(msg)
-			if binModel, ok := updated.(bin.Model); ok {
-				m.binModel = binModel
-			}
-			return m, cmd
+			return handleItemModelUpdate(m, msg, &m.binModel)
 		default:
 			switch m.state {
 			case SelectState:
@@ -71,6 +58,23 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 }
 
+// handleItemModelUpdate delegates updates to specific item model
+func handleItemModelUpdate(m Model, msg tea.Msg, model tea.Model) (Model, tea.Cmd) {
+	updated, cmd := model.Update(msg)
+	switch v := updated.(type) {
+	case logpass.Model:
+		m.logpassModel = v
+	case card.Model:
+		m.cardModel = v
+	case text.Model:
+		m.textModel = v
+	case bin.Model:
+		m.binModel = v
+	}
+	return m, cmd
+}
+
+// handleSelectState manages the item type selection screen
 func handleSelectState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -86,23 +90,22 @@ func handleSelectState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 				m.cursor++
 			}
 		case tea.KeyEnter:
-			choice := m.choices[m.cursor]
-			switch choice {
-			case password:
+			switch m.choices[m.cursor] {
+			case i18n.AddPassword:
 				m.state = AddPassword
-			case bankcard:
+			case i18n.AddCard:
 				m.state = AddCard
-			case textcontent:
+			case i18n.AddText:
 				m.state = AddText
-			case binary:
+			case i18n.AddBinary:
 				m.state = AddBinary
 			}
 		}
 	}
-
 	return m, nil
 }
 
+// handleProcessingState manages the item addition operation
 func handleProcessingState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -113,28 +116,25 @@ func handleProcessingState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 	case ErrorMsg:
 		m.errMsg = msg.Err.Error()
 		m.state = ErrorState
-		return m, nil
 	case AddSuccessMsg:
 		m.state = SelectState
-		return m, nil
 	}
-
 	return m, nil
 }
 
+// handleErrorState manages error display and recovery
 func handleErrorState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.Type {
 		case tea.KeyEnter:
-			m.state = SelectState
-			return m, nil
+			m.state = SelectState // Return to selection on confirmation
 		}
 	}
-
 	return m, nil
 }
 
+// add performs the actual item storage operation
 func (m Model) add(info *models.ItemInfo, content []byte) tea.Cmd {
 	return func() tea.Msg {
 		ctx, cancel := context.WithTimeout(context.Background(), m.timeout)
@@ -144,7 +144,6 @@ func (m Model) add(info *models.ItemInfo, content []byte) tea.Cmd {
 		if err != nil {
 			return ErrorMsg{err}
 		}
-
 		return AddSuccessMsg{}
 	}
 }

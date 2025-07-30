@@ -8,16 +8,19 @@ import (
 	"google.golang.org/grpc"
 )
 
+// AuthClient handles authentication operations via gRPC
 type AuthClient struct {
-	client pb.UserServiceClient
+	client pb.UserServiceClient // gRPC generated client interface
 }
 
+// NewUserClient creates new AuthClient instance
 func NewUserClient(conn *grpc.ClientConn) *AuthClient {
 	return &AuthClient{
 		client: pb.NewUserServiceClient(conn),
 	}
 }
 
+// Register performs user registration via gRPC
 func (c *AuthClient) Register(ctx context.Context, req *models.UserAuthReq) (*models.User, error) {
 	res, err := c.client.Register(ctx, &pb.RegisterRequest{
 		Username: req.Username,
@@ -34,6 +37,7 @@ func (c *AuthClient) Register(ctx context.Context, req *models.UserAuthReq) (*mo
 	}, err
 }
 
+// Login performs user authentication via gRPC
 func (c *AuthClient) Login(ctx context.Context, req *models.UserAuthReq) (*models.User, error) {
 	res, err := c.client.Login(ctx, &pb.LoginRequest{
 		Username: req.Username,

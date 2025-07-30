@@ -1,3 +1,5 @@
+// Package vault implements the main vault screen for item management.
+// Handles listing, viewing and managing all stored secret items.
 package vault
 
 import (
@@ -13,70 +15,95 @@ import (
 	"github.com/rycln/gokeep/shared/models"
 )
 
+// state represents current view state of vault screen
 type state int
 
+// Screen state constants
 const (
-	ListState state = iota
-	DetailState
-	UpdateState
-	BinaryInputState
-	ProcessingState
-	ErrorState
+	ListState        state = iota // Items list view
+	DetailState                   // Item detail view
+	UpdateState                   // Updating items state
+	BinaryInputState              // Binary input processing
+	ProcessingState               // Background operation in progress
+	ErrorState                    // Error display state
 )
 
+// Message types for vault screen communication
 type (
+	// AddItemReqMsg requests showing add item screen
 	AddItemReqMsg struct{ User *models.User }
-	UpdateReqMsg  struct {
+
+	// UpdateReqMsg requests showing update screen for item
+	UpdateReqMsg struct {
 		Info    *models.ItemInfo
 		Content []byte
 	}
+
+	// DeleteSuccessMsg confirms successful item deletion
 	DeleteSuccessMsg struct{}
-	ItemsMsg         struct{ Items []itemRender }
-	ContentMsg       struct{ Content string }
-	ErrorMsg         struct{ Err error }
+
+	// ItemsMsg delivers list of items for display
+	ItemsMsg struct{ Items []itemRender }
+
+	// ContentMsg delivers item content for detail view
+	ContentMsg struct{ Content string }
+
+	// ErrorMsg delivers error information
+	ErrorMsg struct{ Err error }
 )
 
+// itemGetter defines interface for reading items
 type itemGetter interface {
 	List(context.Context, models.UserID) ([]models.ItemInfo, error)
 	GetContent(context.Context, models.ItemID) ([]byte, error)
 }
 
+// itemDeleter defines interface for deleting items
 type itemDeleter interface {
 	Delete(context.Context, models.ItemID) error
 }
 
+// itemService combines item management interfaces
 type itemService interface {
 	itemGetter
 	itemDeleter
 }
 
+// itemRender represents formatted item for display
 type itemRender struct {
-	ID        models.ItemID
-	ItemType  models.ItemType
-	Name      string
-	Metadata  string
-	UpdatedAt time.Time
-	Content   string
+	ID        models.ItemID   // Unique item identifier
+	ItemType  models.ItemType // Type of item (text, card etc)
+	Name      string          // Display name
+	Metadata  string          // Additional description
+	UpdatedAt time.Time       // Last modification time
+	Content   string          // Formatted content
 }
 
+// FilterValue implements list.Item interface for filtering
 func (i itemRender) FilterValue() string { return i.Name }
-func (i itemRender) Title() string       { return i.Name }
+
+// Title implements list.Item interface for display
+func (i itemRender) Title() string { return i.Name }
+
+// Description implements list.Item interface for display
 func (i itemRender) Description() string {
-	return fmt.Sprintf("Тип: %s\n Описание: %s", i.ItemType, i.Metadata)
+	return fmt.Sprintf(i18n.VaultTypeTitle+"\n"+i18n.VaultDescTitle, i.ItemType, i.Metadata)
 }
 
+// Model represents vault screen state and components
 type Model struct {
-	state    state
-	input    string
-	selected *itemRender
-	items    []itemRender
-	list     list.Model
-	errMsg   string
-	service  itemService
-	user     *models.User
-	timeout  time.Duration
+	state    state         // Current view state
+	input    string        // User input buffer
+	selected *itemRender   // Currently selected item
+	items    []itemRender  // List of all items
+	list     list.Model    // List UI component
+	errMsg   string        // Last error message
+	service  itemService   // Item service interface
+	user     *models.User  // Current authenticated user
+	timeout  time.Duration // UI message timeout
 }
 
+// InitialModel creates new vault model with dependencies
 func InitialModel(service itemService, timeout time.Duration) Model {
 	delegate := list.NewDefaultDelegate()
 	delegate.Styles.SelectedTitle = delegate.Styles.SelectedTitle.
@@ -89,11 +116,11 @@ func InitialModel(service itemService, timeout time.Duration) Model {
 		return []key.Binding{
 			key.NewBinding(
 				key.WithKeys("n"),
-				key.WithHelp("n", "добавить"),
+				key.WithHelp("n", i18n.VaultAddItemHelp),
 			),
 			key.NewBinding(
 				key.WithKeys("u"),
-				key.WithHelp("u", "обновить"),
+				key.WithHelp("u", i18n.VaultUpdateHelp),
 			),
 		}
 	}
@@ -103,9 +130,7 @@ func InitialModel(service itemService, timeout time.Duration) Model {
 	l.Styles.Title = styles.TitleStyle
 	l.SetShowStatusBar(true)
 	l.SetFilteringEnabled(true)
-
 	l.StatusMessageLifetime = timeout
-
 	l.SetStatusBarItemName(i18n.VaultListTitleNameSingular, i18n.VaultListTitleNamePlural)
 
 	return Model{
@@ -116,10 +141,12 @@ func InitialModel(service itemService, timeout time.Duration) Model {
 	}
 }
 
+// SetUser updates current authenticated user
 func (m *Model) SetUser(user *models.User) {
 	m.user = user
 }
 
+// SetUpdateState resets view to update items list
 func (m *Model) SetUpdateState() {
 	m.state = UpdateState
 }

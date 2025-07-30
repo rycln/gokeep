@@ -7,10 +7,12 @@ import (
 	"github.com/rycln/gokeep/shared/models"
 )
 
+// Init initializes the authentication model
 func (m Model) Init() tea.Cmd {
 	return nil
 }
 
+// Update handles all messages and state transitions for authentication
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch m.state {
 	case LoginState, RegisterState:
@@ -20,10 +22,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case ErrorState:
 		return handleErrorState(m, msg)
 	}
-
 	return m, nil
 }
 
+// handleAuthInput processes user input in login/register states
 func handleAuthInput(m Model, msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -74,14 +76,15 @@ func handleAuthInput(m Model, msg tea.Msg) (Model, tea.Cmd) {
 			}
 		}
 	}
-
 	return m, nil
 }
 
+// login initiates user authentication
 func (m Model) login() tea.Cmd {
 	return func() tea.Msg {
 		ctx, cancel := context.WithTimeout(context.Background(), m.timeout)
 		defer cancel()
+
 		user, err := m.service.UserLogin(ctx, &models.UserAuthReq{
 			Username: m.username,
 			Password: m.password,
@@ -89,15 +92,16 @@ func (m Model) login() tea.Cmd {
 		if err != nil {
 			return LoginErrorMsg{err}
 		}
-
 		return AuthSuccessMsg{user}
 	}
 }
 
+// register initiates new user registration
 func (m Model) register() tea.Cmd {
 	return func() tea.Msg {
 		ctx, cancel := context.WithTimeout(context.Background(), m.timeout)
 		defer cancel()
+
 		user, err := m.service.UserRegister(ctx, &models.UserAuthReq{
 			Username: m.username,
 			Password: m.password,
@@ -105,11 +109,11 @@ func (m Model) register() tea.Cmd {
 		if err != nil {
 			return RegisterErrorMsg{err}
 		}
-
 		return AuthSuccessMsg{user}
 	}
 }
 
+// handleProcessingState manages authentication operation results
 func handleProcessingState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case LoginErrorMsg:
@@ -121,10 +125,10 @@ func handleProcessingState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 	case AuthSuccessMsg:
 		return m, func() tea.Msg { return msg }
 	}
-
 	return m, nil
 }
 
+// handleErrorState manages error display and recovery
 func handleErrorState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -133,6 +137,5 @@ func handleErrorState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 			m.state = LoginState
 		}
 	}
-
 	return m, nil
 }

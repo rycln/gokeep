@@ -1,3 +1,5 @@
+// App package contains main application logic and initialization.
+// Handles gRPC connections, database setup and TUI program lifecycle.
 package app
 
 import (
@@ -24,24 +26,28 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
+// Build info variables populated during compilation
 var (
 	buildVersion string
 	buildDate    string
 	buildCommit  string
 )
 
+// Application constants
 const (
 	grpcTarget = ":50051"
 	DBpath     = "./gophkeeper.db"
 	timeout    = time.Duration(5) * time.Second
 )
 
+// App represents the main application structure
 type App struct {
-	tui  *tea.Program
-	conn *grpc.ClientConn
-	db   *sql.DB
+	tui  *tea.Program     // TUI program instance
+	conn *grpc.ClientConn // gRPC connection
+	db   *sql.DB          // Database connection
 }
 
+// New creates and initializes a new App instance
 func New() (*App, error) {
 	certPool, _ := x509.SystemCertPool()
 
@@ -86,6 +92,7 @@ func New() (*App, error) {
 	}, nil
 }
 
+// Run starts the application and manages its lifecycle
 func (app *App) Run() error {
 	printBuildInfo()
 
@@ -110,6 +117,7 @@ func (app *App) Run() error {
 	return nil
 }
 
+// cleanup handles resource cleanup on application shutdown
 func (app *App) cleanup() error {
 	if err := app.db.Close(); err != nil {
 		return fmt.Errorf("storage close failed: %w", err)
@@ -122,6 +130,7 @@ func (app *App) cleanup() error {
 	return nil
 }
 
+// printBuildInfo displays version information
 func printBuildInfo() {
 	if buildVersion == "" {
 		buildVersion = "N/A"

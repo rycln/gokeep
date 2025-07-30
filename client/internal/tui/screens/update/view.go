@@ -7,6 +7,8 @@ import (
 	"github.com/rycln/gokeep/client/internal/tui/shared/styles"
 )
 
+// View renders the current update screen based on state.
+// Returns formatted UI with appropriate styling and localization.
 func (m Model) View() string {
 	switch m.state {
 	case LoadState:
@@ -28,6 +30,10 @@ func (m Model) View() string {
 	}
 }
 
+// errorView renders error messages with consistent styling.
+// Formats error message using shared error style and localization.
 func (m Model) errorView() string {
-	return styles.ErrorStyle.Render(fmt.Sprintf(i18n.CommonError, m.errMsg))
+	return styles.ErrorStyle.Render(
+		fmt.Sprintf(i18n.CommonError, m.errMsg),
+	)
 }

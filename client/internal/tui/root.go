@@ -1,3 +1,5 @@
+// Package tui implements the terminal user interface root component.
+// Manages screen transitions and state between all application views.
 package tui
 
 import (
@@ -9,23 +11,27 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+// model represents current active screen
 type model int
 
+// Screen type constants
 const (
-	AuthModel model = iota
-	VaultModel
-	AddModel
-	UpdateModel
+	AuthModel   model = iota // Authentication screen
+	VaultModel               // Main vault screen
+	AddModel                 // Add item screen
+	UpdateModel              // Update item screen
 )
 
+// rootModel manages all application screens and transitions
 type rootModel struct {
-	authModel   auth.Model
-	vaultModel  vault.Model
-	addModel    add.Model
-	updateModel update.Model
-	current     model
+	authModel   auth.Model   // Authentication screen model
+	vaultModel  vault.Model  // Main vault screen model
+	addModel    add.Model    // Add item screen model
+	updateModel update.Model // Update item screen model
+	current     model        // Currently active screen
 }
 
+// InitialRootModel creates root model with all screen dependencies
 func InitialRootModel(auth auth.Model, vault vault.Model, add add.Model, update update.Model) rootModel {
 	return rootModel{
 		authModel:   auth,
@@ -36,10 +42,12 @@ func InitialRootModel(auth auth.Model, vault vault.Model, add add.Model, update 
 	}
 }
 
+// Init initializes the root model
 func (m rootModel) Init() tea.Cmd {
 	return nil
 }
 
+// Update handles messages and screen transitions
 func (m rootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case add.CancelMsg, update.CancelMsg:
@@ -62,11 +70,12 @@ func (m rootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 }
 
+// handleAuthModel processes auth screen
 func handleAuthModel(m rootModel, msg tea.Msg) (rootModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case auth.AuthSuccessMsg:
 		m.vaultModel.SetUser(msg.User)
-		m.current = VaultModel
+		m.current = VaultModel // Switch to vault after auth
 		return m, nil
 	default:
 		updated, cmd := m.authModel.Update(msg)
@@ -77,15 +86,16 @@ func handleAuthModel(m rootModel, msg tea.Msg) (rootModel, tea.Cmd) {
 	}
 }
 
+// handleVaultModel processes main vault screen
 func handleVaultModel(m rootModel, msg tea.Msg) (rootModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case vault.AddItemReqMsg:
 		m.addModel.SetUser(msg.User)
-		m.current = AddModel
+		m.current = AddModel // Switch to add screen
 		return m, nil
 	case vault.UpdateReqMsg:
 		m.updateModel.SetItem(msg.Info, msg.Content)
-		m.current = UpdateModel
+		m.current = UpdateModel // Switch to update screen
 		return m, nil
 	default:
 		updated, cmd := m.vaultModel.Update(msg)
@@ -96,6 +106,7 @@ func handleVaultModel(m rootModel, msg tea.Msg) (rootModel, tea.Cmd) {
 	}
 }
 
+// handleAddModel processes add screen
 func handleAddModel(m rootModel, msg tea.Msg) (rootModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case add.CancelMsg:
@@ -111,6 +122,7 @@ func handleAddModel(m rootModel, msg tea.Msg) (rootModel, tea.Cmd) {
 	}
 }
 
+// handleUpdateModel processes update screen
 func handleUpdateModel(m rootModel, msg tea.Msg) (rootModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case update.CancelMsg:
@@ -126,6 +138,7 @@ func handleUpdateModel(m rootModel, msg tea.Msg) (rootModel, tea.Cmd) {
 	}
 }
 
+// View renders current active screen
 func (m rootModel) View() string {
 	switch m.current {
 	case AuthModel:

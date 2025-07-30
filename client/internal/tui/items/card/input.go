@@ -2,27 +2,22 @@ package card
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/rycln/gokeep/client/internal/tui/shared/i18n"
 	"github.com/rycln/gokeep/client/internal/tui/shared/input"
 	"github.com/rycln/gokeep/client/internal/tui/shared/messages"
 	"github.com/rycln/gokeep/shared/models"
 )
 
-const (
-	nameField       = "Название"
-	infoField       = "Информация"
-	numberField     = "Номер"
-	ownerNameField  = "Имя владельца"
-	expiryDateField = "Срок действия"
-	cvvField        = "CVV"
-)
-
+// Model represents a credit card entry form
 type Model struct {
-	input.Form
+	input.Form // Embedded form component
 }
 
+// InitialModel creates a new card entry form with configured fields
 func InitialModel() Model {
 	m := Model{
 		input.Form{
@@ -37,21 +32,21 @@ func InitialModel() Model {
 
 		switch i {
 		case 0:
-			t.Placeholder = nameField
+			t.Placeholder = i18n.InputName
 			t.Focus()
 		case 1:
-			t.Placeholder = infoField
+			t.Placeholder = i18n.InputInfo
 		case 2:
-			t.Placeholder = numberField
+			t.Placeholder = i18n.CardInputNumber
 			t.CharLimit = 16
 		case 3:
-			t.Placeholder = ownerNameField
+			t.Placeholder = i18n.CardInputHolderName
 			t.CharLimit = 40
 		case 4:
-			t.Placeholder = expiryDateField
+			t.Placeholder = i18n.CardInputExpiryDate
 			t.CharLimit = 5
 		case 5:
-			t.Placeholder = cvvField
+			t.Placeholder = i18n.CardInputCVV
 			t.EchoMode = textinput.EchoPassword
 			t.EchoCharacter = '•'
 		}
@@ -62,6 +57,7 @@ func InitialModel() Model {
 	return m
 }
 
+// Update handles form input and submission events
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -78,6 +74,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
+// send packages form data into a message for processing
 func (m Model) send() tea.Cmd {
 	return func() tea.Msg {
 		info := &models.ItemInfo{
@@ -98,12 +95,9 @@ func (m Model) send() tea.Cmd {
 			return messages.ErrMsg{Err: err}
 		}
 
-		m.Inputs[0].Reset()
-		m.Inputs[1].Reset()
-		m.Inputs[2].Reset()
-		m.Inputs[3].Reset()
-		m.Inputs[4].Reset()
-		m.Inputs[5].Reset()
+		for i := range m.Inputs {
+			m.Inputs[i].Reset()
+		}
 
 		return messages.ItemMsg{
 			Info:    info,
@@ -112,12 +106,13 @@ func (m Model) send() tea.Cmd {
 	}
 }
 
+// SetStartData pre-populates form with existing card data
 func (m *Model) SetStartData(info *models.ItemInfo, content []byte) error {
 	var card Card
 
 	err := json.Unmarshal(content, &card)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal card data: %w", err)
 	}
 
 	m.Inputs[0].SetValue(info.Name)

@@ -13,16 +13,17 @@ import (
 	"github.com/rycln/gokeep/shared/models"
 )
 
+// Init initializes the vault model and checks for required user
 func (m Model) Init() tea.Cmd {
 	if m.user == nil {
 		return func() tea.Msg {
 			return ErrorMsg{Err: fmt.Errorf("user not set")}
 		}
 	}
-
 	return nil
 }
 
+// Update handles all messages and state transitions
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch m.state {
 	case UpdateState:
@@ -45,6 +46,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
+// handleListState manages the item list view interactions
 func handleListState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -76,6 +78,7 @@ func handleListState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 	return m, cmd
 }
 
+// loadItems fetches items from service for current user
 func (m Model) loadItems() tea.Cmd {
 	return func() tea.Msg {
 		ctx, cancel := context.WithTimeout(context.Background(), m.timeout)
@@ -101,6 +104,7 @@ func (m Model) loadItems() tea.Cmd {
 	}
 }
 
+// handleDetailState manages item detail view interactions
 func handleDetailState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -129,6 +133,7 @@ func handleDetailState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 	return m, nil
 }
 
+// getContent retrieves and formats item content based on type
 func (m Model) getContent() tea.Cmd {
 	return func() tea.Msg {
 		ctx, cancel := context.WithTimeout(context.Background(), m.timeout)
@@ -143,30 +148,22 @@ func (m Model) getContent() tea.Cmd {
 		switch m.selected.ItemType {
 		case models.TypePassword:
 			content, err = logpass.GetContentRender(contentBytes)
-			if err != nil {
-				return ErrorMsg{Err: err}
-			}
 		case models.TypeCard:
 			content, err = card.GetContentRender(contentBytes)
-			if err != nil {
-				return ErrorMsg{Err: err}
-			}
 		case models.TypeText:
 			content, err = text.GetContentRender(contentBytes)
-			if err != nil {
-				return ErrorMsg{Err: err}
-			}
 		case models.TypeBinary:
 			content, err = bin.UploadFile(m.input, contentBytes)
-			if err != nil {
-				return ErrorMsg{Err: err}
-			}
+		}
+		if err != nil {
+			return ErrorMsg{Err: err}
 		}
 
 		return ContentMsg{Content: content}
 	}
 }
 
+// deleteItem removes the currently selected item
 func (m Model) deleteItem() tea.Cmd {
 	return func() tea.Msg {
 		ctx, cancel := context.WithTimeout(context.Background(), m.timeout)
@@ -181,6 +178,7 @@ func (m Model) deleteItem() tea.Cmd {
 	}
 }
 
+// updateItem prepares item data for update screen
 func (m Model) updateItem() tea.Cmd {
 	return func() tea.Msg {
 		ctx, cancel := context.WithTimeout(context.Background(), m.timeout)
@@ -191,22 +189,21 @@ func (m Model) updateItem() tea.Cmd {
 			return ErrorMsg{Err: err}
 		}
 
-		info := &models.ItemInfo{
-			ID:        m.selected.ID,
-			UserID:    m.user.ID,
-			ItemType:  m.selected.ItemType,
-			Name:      m.selected.Name,
-			Metadata:  m.selected.Metadata,
-			UpdatedAt: m.selected.UpdatedAt,
-		}
-
 		return UpdateReqMsg{
-			Info:    info,
+			Info: &models.ItemInfo{
+				ID:        m.selected.ID,
+				UserID:    m.user.ID,
+				ItemType:  m.selected.ItemType,
+				Name:      m.selected.Name,
+				Metadata:  m.selected.Metadata,
+				UpdatedAt: m.selected.UpdatedAt,
+			},
 			Content: contentBytes,
 		}
 	}
 }
 
+// handleProcessingState processes background operation results
 func handleProcessingState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case ErrorMsg:
@@ -231,6 +228,7 @@ func handleProcessingState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 	return m, nil
 }
 
+// handleBinaryInputState manages binary file path input
 func handleBinaryInputState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -250,6 +248,7 @@ func handleBinaryInputState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 	return m, nil
 }
 
+// handleErrorState manages error display and recovery
 func handleErrorState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:

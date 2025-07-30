@@ -7,21 +7,18 @@ import (
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/rycln/gokeep/client/internal/tui/shared/i18n"
 	"github.com/rycln/gokeep/client/internal/tui/shared/input"
 	"github.com/rycln/gokeep/client/internal/tui/shared/messages"
 	"github.com/rycln/gokeep/shared/models"
 )
 
-const (
-	nameField    = "Название"
-	infoField    = "Информация"
-	binPathField = "Путь к файлу"
-)
-
+// Model represents the binary file input form
 type Model struct {
-	input.Form
+	input.Form // Embedded form component
 }
 
+// InitialModel creates a new binary input form model
 func InitialModel() Model {
 	m := Model{
 		input.Form{
@@ -36,12 +33,12 @@ func InitialModel() Model {
 
 		switch i {
 		case 0:
-			t.Placeholder = nameField
+			t.Placeholder = i18n.InputName
 			t.Focus()
 		case 1:
-			t.Placeholder = infoField
+			t.Placeholder = i18n.InputInfo
 		case 2:
-			t.Placeholder = binPathField
+			t.Placeholder = i18n.BinInputFilePath
 			t.CharLimit = 100
 		}
 
@@ -51,6 +48,7 @@ func InitialModel() Model {
 	return m
 }
 
+// Update handles form input and events
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -67,6 +65,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
+// send processes the form data and returns a command
 func (m Model) send() tea.Cmd {
 	return func() tea.Msg {
 		info := &models.ItemInfo{
@@ -77,7 +76,7 @@ func (m Model) send() tea.Cmd {
 
 		file, err := os.ReadFile(m.Inputs[2].Value())
 		if err != nil {
-			return messages.ErrMsg{Err: fmt.Errorf("ошибка чтения файла: %v", err)}
+			return messages.ErrMsg{Err: fmt.Errorf("file read error: %v", err)}
 		}
 
 		bin := &BinFile{
@@ -100,12 +99,13 @@ func (m Model) send() tea.Cmd {
 	}
 }
 
+// SetStartData pre-populates form fields with existing item data
 func (m *Model) SetStartData(info *models.ItemInfo, content []byte) error {
 	var binary BinFile
 
 	err := json.Unmarshal(content, &binary)
 	if err != nil {
-		return err
+		return fmt.Errorf("json unmarshal error: %w", err)
 	}
 
 	m.Inputs[0].SetValue(info.Name)
