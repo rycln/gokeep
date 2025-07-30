@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"time"
 
 	pb "github.com/rycln/gokeep/pkg/gen/grpc/gophkeeper"
 	"github.com/rycln/gokeep/shared/models"
@@ -10,20 +9,23 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// userService defines the required domain operations for user management
 type userService interface {
-	CreateUser(context.Context, *models.UserAuthReq) (*models.User, error)
-	AuthUser(context.Context, *models.UserAuthReq) (*models.User, error)
+	CreateUser(context.Context, *models.UserAuthReq) (*models.User, error) // User registration
+	AuthUser(context.Context, *models.UserAuthReq) (*models.User, error)   // User authentication
 }
 
-const timeout = time.Duration(5) * time.Second
-
-func (h *UserHandler) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.AuthResponse, error) {
+// Register handles user registration requests
+func (h *UserHandler) Register(
+	ctx context.Context,
+	req *pb.RegisterRequest,
+) (*pb.AuthResponse, error) {
 	authReq := &models.UserAuthReq{
 		Username: req.Username,
 		Password: req.Password,
 	}
 
-	ctx, cancel := context.WithTimeout(ctx, timeout)
+	ctx, cancel := context.WithTimeout(ctx, h.timeout)
 	defer cancel()
 
 	user, err := h.uservice.CreateUser(ctx, authReq)
@@ -37,16 +39,20 @@ func (h *UserHandler) Register(ctx context.Context, req *pb.RegisterRequest) (*p
 	}, nil
 }
 
-func (s *UserHandler) Login(ctx context.Context, req *pb.LoginRequest) (*pb.AuthResponse, error) {
+// Login handles user authentication requests
+func (h *UserHandler) Login(
+	ctx context.Context,
+	req *pb.LoginRequest,
+) (*pb.AuthResponse, error) {
 	authReq := &models.UserAuthReq{
 		Username: req.Username,
 		Password: req.Password,
 	}
 
-	ctx, cancel := context.WithTimeout(ctx, timeout)
+	ctx, cancel := context.WithTimeout(ctx, h.timeout)
 	defer cancel()
 
-	user, err := s.uservice.AuthUser(ctx, authReq)
+	user, err := h.uservice.AuthUser(ctx, authReq)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
@@ -57,6 +63,10 @@ func (s *UserHandler) Login(ctx context.Context, req *pb.LoginRequest) (*pb.Auth
 	}, nil
 }
 
-func (s *UserHandler) AuthFuncOverride(ctx context.Context, fullMethodName string) (context.Context, error) {
+// AuthFuncOverride provides authentication middleware hook
+func (s *UserHandler) AuthFuncOverride(
+	ctx context.Context,
+	fullMethodName string,
+) (context.Context, error) {
 	return ctx, nil
 }

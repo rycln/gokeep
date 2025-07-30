@@ -1,3 +1,4 @@
+// Package db contains database schema migration files.
 package db
 
 import (

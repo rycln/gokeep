@@ -11,14 +11,17 @@ import (
 	"github.com/rycln/gokeep/shared/models"
 )
 
+// UserStorage manages persistence operations for user entities
 type UserStorage struct {
 	db *sql.DB
 }
 
+// NewUserStorage creates a new UserStorage instance with the given database connection
 func NewUserStorage(db *sql.DB) *UserStorage {
 	return &UserStorage{db: db}
 }
 
+// AddUser persists a new user to the database
 func (s *UserStorage) AddUser(ctx context.Context, user *models.UserDB) error {
 	_, err := s.db.ExecContext(ctx, sqlAddUser, user.ID, user.Username, user.PassHash)
 	if err != nil {
@@ -28,19 +31,22 @@ func (s *UserStorage) AddUser(ctx context.Context, user *models.UserDB) error {
 		}
 		return err
 	}
-
 	return nil
 }
 
+// GetUserByUsername retrieves a user by their username
 func (s *UserStorage) GetUserByUsername(ctx context.Context, username string) (*models.UserDB, error) {
 	row := s.db.QueryRowContext(ctx, sqlGetUserByUsername, username)
+
 	var userDB models.UserDB
 	err := row.Scan(&userDB.ID, &userDB.Username, &userDB.PassHash)
-	if errors.Is(err, sql.ErrNoRows) {
+
+	switch {
+	case errors.Is(err, sql.ErrNoRows):
 		return nil, newErrNoUser(ErrNoUser)
-	}
-	if err != nil {
+	case err != nil:
 		return nil, err
+	default:
+		return &userDB, nil
 	}
-	return &userDB, nil
 }

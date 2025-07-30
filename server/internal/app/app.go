@@ -97,7 +97,7 @@ func New() (*App, error) {
 		),
 	)
 
-	gs := server.NewGophKeeperServer(authservice)
+	gs := server.NewGophKeeperServer(authservice, cfg.Timeout)
 
 	pb.RegisterUserServiceServer(g, gs)
 
