@@ -9,6 +9,8 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+//go:generate mockgen -source=$GOFILE -destination=./mocks/mock_$GOFILE -package=mocks
+
 // userService defines the required domain operations for user management
 type userService interface {
 	CreateUser(context.Context, *models.UserAuthReq) (*models.User, error) // User registration

@@ -11,6 +11,8 @@ import (
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/auth"
 )
 
+//go:generate mockgen -source=$GOFILE -destination=./mocks/mock_$GOFILE -package=mocks
+
 // authServicer defines the interface for authentication operations.
 // Implementations should handle both JWT generation and parsing.
 type jwtServicer interface {
