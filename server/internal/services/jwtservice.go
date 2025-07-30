@@ -41,6 +41,10 @@ func (c jwtClaims) Validate() error {
 
 // NewJWTString generates a new signed JWT token
 func (s *JWTService) NewJWTString(userID models.UserID) (string, error) {
+	if userID == "" {
+		return "", errNoUserID
+	}
+
 	claims := jwtClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.jwtExp)),
