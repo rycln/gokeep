@@ -111,12 +111,12 @@ func (app *App) Run() error {
 }
 
 func (app *App) cleanup() error {
-	if err := app.conn.Close(); err != nil {
-		return fmt.Errorf("conn close failed: %w", err)
-	}
-
 	if err := app.db.Close(); err != nil {
 		return fmt.Errorf("storage close failed: %w", err)
+	}
+
+	if err := app.conn.Close(); err != nil {
+		return fmt.Errorf("conn close failed: %w", err)
 	}
 
 	return nil
