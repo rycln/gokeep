@@ -6,6 +6,8 @@ import (
 	"github.com/rycln/gokeep/shared/models"
 )
 
+//go:generate mockgen -source=$GOFILE -destination=./mocks/mock_$GOFILE -package=mocks
+
 // AuthAPI defines the interface for authentication operations
 type AuthAPI interface {
 	Register(context.Context, *models.UserAuthReq) (*models.User, error)

@@ -8,6 +8,8 @@ import (
 	"github.com/rycln/gokeep/shared/models"
 )
 
+//go:generate mockgen -source=$GOFILE -destination=./mocks/mock_$GOFILE -package=mocks
+
 // Interfaces for storage operations (segregated by function)
 type itemStorer interface {
 	Add(context.Context, *models.ItemInfo, []byte) error
