@@ -1,3 +1,5 @@
+// Package crypto provides AES-GCM encryption/decryption functionality.
+// Implements secure symmetric encryption for sensitive data storage.
 package crypto
 
 import (
@@ -8,27 +10,35 @@ import (
 	"io"
 )
 
+// Error definitions for crypto operations
 var (
-	errShortKeySize = errors.New("invalid key size, expected 32 bytes")
-	errShortCrypted = errors.New("crypted content too short")
-	errNoKey        = errors.New("no key")
+	errShortKeySize = errors.New("invalid key size, expected 32 bytes") // AES-256 requires 32-byte key
+	errShortCrypted = errors.New("crypted content too short")           // Minimum valid ciphertext length
+	errNoKey        = errors.New("no key")                              // Key not initialized
 )
 
+// AESCrypter implements AES-GCM encryption/decryption
+// Uses 256-bit keys and provides authenticated encryption
 type AESCrypter struct {
-	key []byte
+	key []byte // Encryption key (must be 32 bytes)
 }
 
-func NewAESCrypter() *AESCrypter { return &AESCrypter{} }
+// NewAESCrypter creates a new AES crypter instance
+// Note: Key must be set via SetKey before use
+func NewAESCrypter() *AESCrypter {
+	return &AESCrypter{}
+}
 
+// SetKey configures the encryption key
 func (c *AESCrypter) SetKey(key []byte) error {
 	if len(key) != 32 {
 		return errShortKeySize
 	}
 	c.key = key
-
 	return nil
 }
 
+// Encrypt encrypts data using AES-GCM
 func (c *AESCrypter) Encrypt(content []byte) ([]byte, error) {
 	if len(c.key) == 0 {
 		return nil, errNoKey
@@ -52,6 +62,7 @@ func (c *AESCrypter) Encrypt(content []byte) ([]byte, error) {
 	return gcm.Seal(nonce, nonce, content, nil), nil
 }
 
+// Decrypt decrypts AES-GCM encrypted data
 func (c *AESCrypter) Decrypt(crypted []byte) ([]byte, error) {
 	if len(c.key) == 0 {
 		return nil, errNoKey
