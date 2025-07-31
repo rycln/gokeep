@@ -18,10 +18,11 @@ func TestInitialModel(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockKey := mocks.NewMockkeyProvider(ctrl)
 		mockService := mocks.NewMockauthService(ctrl)
 		timeout := 5 * time.Second
 
-		model := InitialModel(mockService, timeout)
+		model := InitialModel(mockService, mockKey, timeout)
 
 		assert.Equal(t, LoginState, model.state)
 		assert.Equal(t, UsernameField, model.activeField)
@@ -38,8 +39,9 @@ func TestGetState(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockKey := mocks.NewMockkeyProvider(ctrl)
 		mockService := mocks.NewMockauthService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		model := InitialModel(mockService, mockKey, time.Second)
 		model.state = RegisterState
 
 		assert.Equal(t, RegisterState, model.GetState())
@@ -51,8 +53,9 @@ func TestInit(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockKey := mocks.NewMockkeyProvider(ctrl)
 		mockService := mocks.NewMockauthService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		model := InitialModel(mockService, mockKey, time.Second)
 
 		cmd := model.Init()
 		assert.Nil(t, cmd)
@@ -64,8 +67,9 @@ func TestHandleAuthInput(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockKey := mocks.NewMockkeyProvider(ctrl)
 		mockService := mocks.NewMockauthService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		model := InitialModel(mockService, mockKey, time.Second)
 		model.state = LoginState
 
 		newModel, cmd := handleAuthInput(model, tea.KeyMsg{Type: tea.KeyEnter})
@@ -77,8 +81,9 @@ func TestHandleAuthInput(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockKey := mocks.NewMockkeyProvider(ctrl)
 		mockService := mocks.NewMockauthService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		model := InitialModel(mockService, mockKey, time.Second)
 		model.state = RegisterState
 
 		newModel, cmd := handleAuthInput(model, tea.KeyMsg{Type: tea.KeyEnter})
@@ -90,8 +95,9 @@ func TestHandleAuthInput(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockKey := mocks.NewMockkeyProvider(ctrl)
 		mockService := mocks.NewMockauthService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		model := InitialModel(mockService, mockKey, time.Second)
 
 		newModel, _ := handleAuthInput(model, tea.KeyMsg{Type: tea.KeyTab})
 		assert.Equal(t, RegisterState, newModel.state)
@@ -104,8 +110,9 @@ func TestHandleAuthInput(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockKey := mocks.NewMockkeyProvider(ctrl)
 		mockService := mocks.NewMockauthService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		model := InitialModel(mockService, mockKey, time.Second)
 
 		newModel, _ := handleAuthInput(model, tea.KeyMsg{Type: tea.KeyDown})
 		assert.Equal(t, PasswordField, newModel.activeField)
@@ -118,8 +125,9 @@ func TestHandleAuthInput(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockKey := mocks.NewMockkeyProvider(ctrl)
 		mockService := mocks.NewMockauthService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		model := InitialModel(mockService, mockKey, time.Second)
 		model.activeField = UsernameField
 
 		newModel, _ := handleAuthInput(model, tea.KeyMsg{
@@ -133,8 +141,9 @@ func TestHandleAuthInput(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockKey := mocks.NewMockkeyProvider(ctrl)
 		mockService := mocks.NewMockauthService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		model := InitialModel(mockService, mockKey, time.Second)
 		model.activeField = PasswordField
 
 		newModel, _ := handleAuthInput(model, tea.KeyMsg{
@@ -148,8 +157,9 @@ func TestHandleAuthInput(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockKey := mocks.NewMockkeyProvider(ctrl)
 		mockService := mocks.NewMockauthService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		model := InitialModel(mockService, mockKey, time.Second)
 		model.activeField = UsernameField
 
 		newModel, _ := handleAuthInput(model, tea.KeyMsg{
@@ -163,8 +173,9 @@ func TestHandleAuthInput(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockKey := mocks.NewMockkeyProvider(ctrl)
 		mockService := mocks.NewMockauthService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		model := InitialModel(mockService, mockKey, time.Second)
 		model.activeField = UsernameField
 		model.username = "test"
 
@@ -176,8 +187,9 @@ func TestHandleAuthInput(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockKey := mocks.NewMockkeyProvider(ctrl)
 		mockService := mocks.NewMockauthService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		model := InitialModel(mockService, mockKey, time.Second)
 		model.activeField = PasswordField
 		model.password = "pass"
 
@@ -191,14 +203,15 @@ func TestLogin(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockKey := mocks.NewMockkeyProvider(ctrl)
 		mockService := mocks.NewMockauthService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		model := InitialModel(mockService, mockKey, time.Second)
 		model.username = "testuser"
 		model.password = "testpass"
 
 		expectedUser := &models.User{ID: "user123"}
 		mockService.EXPECT().
-			UserLogin(gomock.Any(), &models.UserAuthReq{
+			UserLogin(gomock.Any(), &models.UserLoginReq{
 				Username: "testuser",
 				Password: "testpass",
 			}).
@@ -214,8 +227,9 @@ func TestLogin(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockKey := mocks.NewMockkeyProvider(ctrl)
 		mockService := mocks.NewMockauthService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		model := InitialModel(mockService, mockKey, time.Second)
 		model.username = "testuser"
 		model.password = "testpass"
 
@@ -236,16 +250,21 @@ func TestRegister(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockKey := mocks.NewMockkeyProvider(ctrl)
 		mockService := mocks.NewMockauthService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		model := InitialModel(mockService, mockKey, time.Second)
 		model.username = "newuser"
 		model.password = "newpass"
+		testSalt := "salt"
 
 		expectedUser := &models.User{ID: "user456"}
+
+		mockKey.EXPECT().GenerateSalt().Return([]byte(testSalt), nil)
 		mockService.EXPECT().
-			UserRegister(gomock.Any(), &models.UserAuthReq{
+			UserRegister(gomock.Any(), &models.UserRegReq{
 				Username: "newuser",
 				Password: "newpass",
+				Salt:     testSalt,
 			}).
 			Return(expectedUser, nil)
 
@@ -259,12 +278,15 @@ func TestRegister(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockKey := mocks.NewMockkeyProvider(ctrl)
 		mockService := mocks.NewMockauthService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		model := InitialModel(mockService, mockKey, time.Second)
 		model.username = "newuser"
 		model.password = "newpass"
+		testSalt := "salt"
 
 		testErr := errors.New("registration failed")
+		mockKey.EXPECT().GenerateSalt().Return([]byte(testSalt), nil)
 		mockService.EXPECT().
 			UserRegister(gomock.Any(), gomock.Any()).
 			Return(nil, testErr)
@@ -281,8 +303,9 @@ func TestHandleProcessingState(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockKey := mocks.NewMockkeyProvider(ctrl)
 		mockService := mocks.NewMockauthService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		model := InitialModel(mockService, mockKey, time.Second)
 		model.state = ProcessingState
 
 		testErr := errors.New("login error")
@@ -296,8 +319,9 @@ func TestHandleProcessingState(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockKey := mocks.NewMockkeyProvider(ctrl)
 		mockService := mocks.NewMockauthService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		model := InitialModel(mockService, mockKey, time.Second)
 		model.state = ProcessingState
 
 		testErr := errors.New("register error")
@@ -311,8 +335,9 @@ func TestHandleProcessingState(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockKey := mocks.NewMockkeyProvider(ctrl)
 		mockService := mocks.NewMockauthService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		model := InitialModel(mockService, mockKey, time.Second)
 		model.state = ProcessingState
 
 		user := &models.User{ID: "testuser"}
@@ -328,8 +353,9 @@ func TestHandleErrorState(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockKey := mocks.NewMockkeyProvider(ctrl)
 		mockService := mocks.NewMockauthService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		model := InitialModel(mockService, mockKey, time.Second)
 		model.state = ErrorState
 
 		newModel, _ := handleErrorState(model, tea.KeyMsg{Type: tea.KeyEnter})
@@ -340,8 +366,9 @@ func TestHandleErrorState(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockKey := mocks.NewMockkeyProvider(ctrl)
 		mockService := mocks.NewMockauthService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		model := InitialModel(mockService, mockKey, time.Second)
 		model.state = ErrorState
 
 		newModel, _ := handleErrorState(model, tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'a'}})
@@ -354,8 +381,9 @@ func TestView(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockKey := mocks.NewMockkeyProvider(ctrl)
 		mockService := mocks.NewMockauthService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		model := InitialModel(mockService, mockKey, time.Second)
 		model.state = ProcessingState
 
 		view := model.View()
@@ -366,8 +394,9 @@ func TestView(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockKey := mocks.NewMockkeyProvider(ctrl)
 		mockService := mocks.NewMockauthService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		model := InitialModel(mockService, mockKey, time.Second)
 		model.state = ErrorState
 		model.errMsg = "test error"
 
@@ -379,8 +408,9 @@ func TestView(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockKey := mocks.NewMockkeyProvider(ctrl)
 		mockService := mocks.NewMockauthService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		model := InitialModel(mockService, mockKey, time.Second)
 		model.state = LoginState
 		model.username = "user"
 		model.password = "pass"
@@ -395,8 +425,9 @@ func TestView(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockKey := mocks.NewMockkeyProvider(ctrl)
 		mockService := mocks.NewMockauthService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		model := InitialModel(mockService, mockKey, time.Second)
 		model.state = RegisterState
 		model.username = "newuser"
 		model.password = "newpass"

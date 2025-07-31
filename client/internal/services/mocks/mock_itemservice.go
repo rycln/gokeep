@@ -176,6 +176,59 @@ func (mr *MockitemUpdaterMockRecorder) UpdateItem(arg0, arg1, arg2 interface{}) 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateItem", reflect.TypeOf((*MockitemUpdater)(nil).UpdateItem), arg0, arg1, arg2)
 }
 
+// Mockcrypter is a mock of crypter interface.
+type Mockcrypter struct {
+	ctrl     *gomock.Controller
+	recorder *MockcrypterMockRecorder
+}
+
+// MockcrypterMockRecorder is the mock recorder for Mockcrypter.
+type MockcrypterMockRecorder struct {
+	mock *Mockcrypter
+}
+
+// NewMockcrypter creates a new mock instance.
+func NewMockcrypter(ctrl *gomock.Controller) *Mockcrypter {
+	mock := &Mockcrypter{ctrl: ctrl}
+	mock.recorder = &MockcrypterMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *Mockcrypter) EXPECT() *MockcrypterMockRecorder {
+	return m.recorder
+}
+
+// Decrypt mocks base method.
+func (m *Mockcrypter) Decrypt(arg0 []byte) ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Decrypt", arg0)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Decrypt indicates an expected call of Decrypt.
+func (mr *MockcrypterMockRecorder) Decrypt(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Decrypt", reflect.TypeOf((*Mockcrypter)(nil).Decrypt), arg0)
+}
+
+// Encrypt mocks base method.
+func (m *Mockcrypter) Encrypt(arg0 []byte) ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Encrypt", arg0)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Encrypt indicates an expected call of Encrypt.
+func (mr *MockcrypterMockRecorder) Encrypt(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Encrypt", reflect.TypeOf((*Mockcrypter)(nil).Encrypt), arg0)
+}
+
 // MockitemStorage is a mock of itemStorage interface.
 type MockitemStorage struct {
 	ctrl     *gomock.Controller

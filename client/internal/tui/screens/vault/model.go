@@ -26,6 +26,7 @@ const (
 	DetailState                   // Item detail view
 	UpdateState                   // Updating items state
 	BinaryInputState              // Binary input processing
+	StartState                    // First open of vault screen after auth
 	ProcessingState               // Background operation in progress
 	ErrorState                    // Error display state
 )
@@ -101,12 +102,13 @@ type Model struct {
 	list     list.Model    // List UI component
 	errMsg   string        // Last error message
 	service  itemService   // Item service interface
+	crypt    crypter       // Encrypt/decrypt operations
 	user     *models.User  // Current authenticated user
 	timeout  time.Duration // UI message timeout
 }
 
 // InitialModel creates new vault model with dependencies
-func InitialModel(service itemService, timeout time.Duration) Model {
+func InitialModel(service itemService, crypt crypter, timeout time.Duration) Model {
 	delegate := list.NewDefaultDelegate()
 	delegate.Styles.SelectedTitle = delegate.Styles.SelectedTitle.
 		Border(lipgloss.ThickBorder(), false, false, false, true).
@@ -139,6 +141,7 @@ func InitialModel(service itemService, timeout time.Duration) Model {
 		state:   UpdateState,
 		list:    l,
 		service: service,
+		crypt:   crypt,
 		timeout: timeout,
 	}
 }
@@ -146,6 +149,7 @@ func InitialModel(service itemService, timeout time.Duration) Model {
 // SetUser updates current authenticated user
 func (m *Model) SetUser(user *models.User) {
 	m.user = user
+
 }
 
 // SetUpdateState resets view to update items list

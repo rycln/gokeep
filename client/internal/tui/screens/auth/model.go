@@ -44,8 +44,33 @@ type (
 
 // authService defines required authentication operations
 type authService interface {
-	UserRegister(context.Context, *models.UserAuthReq) (*models.User, error)
-	UserLogin(context.Context, *models.UserAuthReq) (*models.User, error)
+	UserRegister(context.Context, *models.UserRegReq) (*models.User, error)
+	UserLogin(context.Context, *models.UserLoginReq) (*models.User, error)
+}
+
+type saltGenerator interface {
+	GenerateSalt() (string, error)
+}
+
+type saltConverter interface {
+	EncodeSalt([]byte) string
+	DecodeSalt(string) ([]byte, error)
+}
+
+type keyDeriver interface {
+	DeriveKeyFromPasswordAndSalt(string, []byte) ([]byte, error)
+}
+
+// keyProvider defines key handling for crypto operations
+type keyProvider interface {
+	saltGenerator
+	saltConverter
+	keyDeriver
+}
+
+// crypter defines interface for encryption and decryption operations
+type crypter interface {
+	SetKey(key []byte) error
 }
 
 // Model represents authentication screen state
@@ -56,16 +81,20 @@ type Model struct {
 	password    string        // Password input value
 	errMsg      string        // Last error message
 	service     authService   // Authentication service
+	key         keyProvider   // Key operations
+	crypt       crypter       // For key setting
 	timeout     time.Duration // Operation timeout
 }
 
 // InitialModel creates new authentication model with dependencies
-func InitialModel(service authService, timeout time.Duration) Model {
+func InitialModel(service authService, key keyProvider, crypt crypter, timeout time.Duration) Model {
 	return Model{
 		state:       LoginState,
 		activeField: UsernameField,
 		service:     service,
 		timeout:     timeout,
+		key:         key,
+		crypt:       crypt,
 	}
 }
 

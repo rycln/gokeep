@@ -29,6 +29,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case UpdateState:
 		m.state = ProcessingState
 		return m, m.loadItems()
+	case StartState:
+		m.state = ProcessingState
+		return m, m.setKey()
 	case ListState:
 		return handleListState(m, msg)
 	case DetailState:
@@ -259,4 +262,17 @@ func handleErrorState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 	}
 
 	return m, nil
+}
+
+// setKey set key into crypt
+func (m Model) setKey() tea.Cmd {
+	return func() tea.Msg {
+
+		err := m.crypt.SetKey(m.user)
+		if err != nil {
+			return ErrorMsg{Err: err}
+		}
+
+		return DeleteSuccessMsg{}
+	}
 }

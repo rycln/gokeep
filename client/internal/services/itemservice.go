@@ -28,6 +28,11 @@ type itemUpdater interface {
 	UpdateItem(context.Context, *models.ItemInfo, []byte) error
 }
 
+type crypter interface {
+	Encrypt([]byte) ([]byte, error)
+	Decrypt([]byte) ([]byte, error)
+}
+
 // itemStorage combines all storage operations interfaces
 type itemStorage interface {
 	itemStorer
@@ -39,12 +44,14 @@ type itemStorage interface {
 // ItemService handles business logic for item operations
 type ItemService struct {
 	storage itemStorage
+	crypt   crypter
 }
 
 // NewItemService creates a new ItemService instance
-func NewItemService(storage itemStorage) *ItemService {
+func NewItemService(storage itemStorage, crypt crypter) *ItemService {
 	return &ItemService{
 		storage: storage,
+		crypt:   crypt,
 	}
 }
 
@@ -52,7 +59,12 @@ func NewItemService(storage itemStorage) *ItemService {
 func (s *ItemService) Add(ctx context.Context, info *models.ItemInfo, content []byte) error {
 	info.ID = models.ItemID(uuid.New().String())
 	info.UpdatedAt = time.Now()
-	return s.storage.Add(ctx, info, content)
+	crypted, err := s.crypt.Encrypt(content)
+	if err != nil {
+		return err
+	}
+
+	return s.storage.Add(ctx, info, crypted)
 }
 
 // List retrieves all items for a specific user
@@ -62,7 +74,17 @@ func (s *ItemService) List(ctx context.Context, uid models.UserID) ([]models.Ite
 
 // GetContent retrieves the encrypted content of an item
 func (s *ItemService) GetContent(ctx context.Context, id models.ItemID) ([]byte, error) {
-	return s.storage.GetContent(ctx, id)
+	crypted, err := s.storage.GetContent(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	decrypted, err := s.crypt.Decrypt(crypted)
+	if err != nil {
+		return nil, err
+	}
+
+	return decrypted, nil
 }
 
 // Delete removes an item by its ID
@@ -73,5 +95,10 @@ func (s *ItemService) Delete(ctx context.Context, id models.ItemID) error {
 // Update modifies an existing item and updates its timestamp
 func (s *ItemService) Update(ctx context.Context, info *models.ItemInfo, content []byte) error {
 	info.UpdatedAt = time.Now()
-	return s.storage.UpdateItem(ctx, info, content)
+	crypted, err := s.crypt.Encrypt(content)
+	if err != nil {
+		return err
+	}
+
+	return s.storage.UpdateItem(ctx, info, crypted)
 }

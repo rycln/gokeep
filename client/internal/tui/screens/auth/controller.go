@@ -85,13 +85,14 @@ func (m Model) login() tea.Cmd {
 		ctx, cancel := context.WithTimeout(context.Background(), m.timeout)
 		defer cancel()
 
-		user, err := m.service.UserLogin(ctx, &models.UserAuthReq{
+		user, err := m.service.UserLogin(ctx, &models.UserLoginReq{
 			Username: m.username,
 			Password: m.password,
 		})
 		if err != nil {
 			return LoginErrorMsg{err}
 		}
+
 		return AuthSuccessMsg{user}
 	}
 }
@@ -102,13 +103,22 @@ func (m Model) register() tea.Cmd {
 		ctx, cancel := context.WithTimeout(context.Background(), m.timeout)
 		defer cancel()
 
-		user, err := m.service.UserRegister(ctx, &models.UserAuthReq{
+		salt, err := m.key.GenerateSalt()
+		if err != nil {
+			return RegisterErrorMsg{err}
+		}
+
+		user, err := m.service.UserRegister(ctx, &models.UserRegReq{
 			Username: m.username,
 			Password: m.password,
+			Salt:     salt,
 		})
 		if err != nil {
 			return RegisterErrorMsg{err}
 		}
+
+		key, err := m.key.DeriveKeyFromPassword()
+
 		return AuthSuccessMsg{user}
 	}
 }
