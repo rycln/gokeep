@@ -39,6 +39,7 @@ func (h *UserHandler) Register(
 	return &pb.AuthResponse{
 		UserId: string(user.ID),
 		Token:  user.JWT,
+		Salt:   req.Salt,
 	}, nil
 }
 
@@ -63,6 +64,7 @@ func (h *UserHandler) Login(
 	return &pb.AuthResponse{
 		UserId: string(user.ID),
 		Token:  user.JWT,
+		Salt:   user.Salt,
 	}, nil
 }
 
