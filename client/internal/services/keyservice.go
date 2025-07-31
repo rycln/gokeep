@@ -32,14 +32,14 @@ func (s *KeyService) GenerateSalt() ([]byte, error) {
 	return salt, nil
 }
 
-func (s *KeyService) DeriveKeyFromPassword(password string, salt []byte) ([]byte, error) {
+func (s *KeyService) DeriveKeyFromPasswordAndSalt(password string, salt []byte) []byte {
 	return pbkdf2.Key(
 		[]byte(password),
 		salt,
 		pbkdf2Iterations,
 		keyLength,
 		sha256.New,
-	), nil
+	)
 }
 
 func (s *KeyService) DecodeSalt(salt string) ([]byte, error) {

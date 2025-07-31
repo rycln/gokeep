@@ -48,20 +48,28 @@ type authService interface {
 	UserLogin(context.Context, *models.UserLoginReq) (*models.User, error)
 }
 
+// saltGenerator defines operations for generating cryptographic salt
 type saltGenerator interface {
-	GenerateSalt() (string, error)
+	// GenerateSalt creates a new random salt value
+	GenerateSalt() ([]byte, error)
 }
 
+// saltConverter defines operations for encoding and decoding salt values
 type saltConverter interface {
+	// EncodeSalt converts binary salt to string representation
 	EncodeSalt([]byte) string
+	// DecodeSalt converts string salt back to binary representation
 	DecodeSalt(string) ([]byte, error)
 }
 
+// keyDeriver defines operations for deriving cryptographic keys
 type keyDeriver interface {
-	DeriveKeyFromPasswordAndSalt(string, []byte) ([]byte, error)
+	// DeriveKeyFromPasswordAndSalt creates a cryptographic key from password and salt
+	DeriveKeyFromPasswordAndSalt(string, []byte) []byte
 }
 
-// keyProvider defines key handling for crypto operations
+// keyProvider defines key handling for crypto operations, combining salt generation,
+// conversion and key derivation capabilities
 type keyProvider interface {
 	saltGenerator
 	saltConverter
@@ -70,24 +78,30 @@ type keyProvider interface {
 
 // crypter defines interface for encryption and decryption operations
 type crypter interface {
+	// SetKey configures the encryption key to be used for subsequent operations
 	SetKey(key []byte) error
 }
 
-// Model represents authentication screen state
+// Model represents authentication screen state and its dependencies
 type Model struct {
 	state       state         // Current screen state
-	activeField field         // Currently focused field
+	activeField field         // Currently focused input field
 	username    string        // Username input value
 	password    string        // Password input value
-	errMsg      string        // Last error message
-	service     authService   // Authentication service
-	key         keyProvider   // Key operations
-	crypt       crypter       // For key setting
-	timeout     time.Duration // Operation timeout
+	errMsg      string        // Last error message to display
+	service     authService   // Authentication service implementation
+	key         keyProvider   // Key generation and handling provider
+	crypt       crypter       // Cryptographic operations handler
+	timeout     time.Duration // Maximum duration for authentication operations
 }
 
 // InitialModel creates new authentication model with dependencies
-func InitialModel(service authService, key keyProvider, crypt crypter, timeout time.Duration) Model {
+func InitialModel(
+	service authService,
+	key keyProvider,
+	crypt crypter,
+	timeout time.Duration,
+) Model {
 	return Model{
 		state:       LoginState,
 		activeField: UsernameField,
@@ -99,6 +113,7 @@ func InitialModel(service authService, key keyProvider, crypt crypter, timeout t
 }
 
 // GetState returns current authentication screen state
+// Returns the current state enum value
 func (m Model) GetState() state {
 	return m.state
 }

@@ -1,4 +1,4 @@
-package services
+package crypto
 
 import (
 	"crypto/aes"
@@ -18,7 +18,7 @@ type AESCrypter struct {
 	key []byte
 }
 
-func NewAESCrypter(key []byte) *AESCrypter { return &AESCrypter{} }
+func NewAESCrypter() *AESCrypter { return &AESCrypter{} }
 
 func (c *AESCrypter) SetKey(key []byte) error {
 	if len(key) != 32 {

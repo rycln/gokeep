@@ -93,6 +93,18 @@ func (m Model) login() tea.Cmd {
 			return LoginErrorMsg{err}
 		}
 
+		decSalt, err := m.key.DecodeSalt(user.Salt)
+		if err != nil {
+			return LoginErrorMsg{err}
+		}
+
+		key := m.key.DeriveKeyFromPasswordAndSalt(m.password, decSalt)
+
+		err = m.crypt.SetKey(key)
+		if err != nil {
+			return LoginErrorMsg{err}
+		}
+
 		return AuthSuccessMsg{user}
 	}
 }
@@ -108,16 +120,23 @@ func (m Model) register() tea.Cmd {
 			return RegisterErrorMsg{err}
 		}
 
+		encSalt := m.key.EncodeSalt(salt)
+
 		user, err := m.service.UserRegister(ctx, &models.UserRegReq{
 			Username: m.username,
 			Password: m.password,
-			Salt:     salt,
+			Salt:     encSalt,
 		})
 		if err != nil {
 			return RegisterErrorMsg{err}
 		}
 
-		key, err := m.key.DeriveKeyFromPassword()
+		key := m.key.DeriveKeyFromPasswordAndSalt(m.password, salt)
+
+		err = m.crypt.SetKey(key)
+		if err != nil {
+			return RegisterErrorMsg{err}
+		}
 
 		return AuthSuccessMsg{user}
 	}

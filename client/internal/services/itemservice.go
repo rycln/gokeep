@@ -10,7 +10,7 @@ import (
 
 //go:generate mockgen -source=$GOFILE -destination=./mocks/mock_$GOFILE -package=mocks
 
-// Interfaces for storage operations (segregated by function)
+// Interfaces for storage operations
 type itemStorer interface {
 	Add(context.Context, *models.ItemInfo, []byte) error
 }
@@ -28,6 +28,7 @@ type itemUpdater interface {
 	UpdateItem(context.Context, *models.ItemInfo, []byte) error
 }
 
+// crypter handles item encrypt/decrypt operations
 type crypter interface {
 	Encrypt([]byte) ([]byte, error)
 	Decrypt([]byte) ([]byte, error)

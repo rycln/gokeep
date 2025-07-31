@@ -17,6 +17,7 @@ import (
 	client "github.com/rycln/gokeep/client/internal/grpc"
 	"github.com/rycln/gokeep/client/internal/services"
 	"github.com/rycln/gokeep/client/internal/storage"
+	"github.com/rycln/gokeep/client/internal/strategies/crypto"
 	"github.com/rycln/gokeep/client/internal/tui"
 	"github.com/rycln/gokeep/client/internal/tui/screens/add"
 	"github.com/rycln/gokeep/client/internal/tui/screens/auth"
@@ -76,9 +77,12 @@ func New() (*App, error) {
 	itemStorage := storage.NewItemStorage(db)
 
 	authService := services.NewAuthService(client.NewUserClient(conn))
-	itemService := services.NewItemService(itemStorage)
 
-	authScreen := auth.InitialModel(authService, timeout)
+	crypt := crypto.NewAESCrypter()
+	itemService := services.NewItemService(itemStorage, crypt)
+	keyService := services.NewKeyService()
+
+	authScreen := auth.InitialModel(authService, keyService, crypt, timeout)
 	vaultScreen := vault.InitialModel(itemService, timeout)
 	addScreen := add.InitialModel(itemService, timeout)
 	updateScreen := update.InitialModel(itemService, timeout)

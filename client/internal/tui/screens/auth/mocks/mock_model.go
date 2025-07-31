@@ -65,6 +65,133 @@ func (mr *MockauthServiceMockRecorder) UserRegister(arg0, arg1 interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UserRegister", reflect.TypeOf((*MockauthService)(nil).UserRegister), arg0, arg1)
 }
 
+// MocksaltGenerator is a mock of saltGenerator interface.
+type MocksaltGenerator struct {
+	ctrl     *gomock.Controller
+	recorder *MocksaltGeneratorMockRecorder
+}
+
+// MocksaltGeneratorMockRecorder is the mock recorder for MocksaltGenerator.
+type MocksaltGeneratorMockRecorder struct {
+	mock *MocksaltGenerator
+}
+
+// NewMocksaltGenerator creates a new mock instance.
+func NewMocksaltGenerator(ctrl *gomock.Controller) *MocksaltGenerator {
+	mock := &MocksaltGenerator{ctrl: ctrl}
+	mock.recorder = &MocksaltGeneratorMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MocksaltGenerator) EXPECT() *MocksaltGeneratorMockRecorder {
+	return m.recorder
+}
+
+// GenerateSalt mocks base method.
+func (m *MocksaltGenerator) GenerateSalt() ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GenerateSalt")
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GenerateSalt indicates an expected call of GenerateSalt.
+func (mr *MocksaltGeneratorMockRecorder) GenerateSalt() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenerateSalt", reflect.TypeOf((*MocksaltGenerator)(nil).GenerateSalt))
+}
+
+// MocksaltConverter is a mock of saltConverter interface.
+type MocksaltConverter struct {
+	ctrl     *gomock.Controller
+	recorder *MocksaltConverterMockRecorder
+}
+
+// MocksaltConverterMockRecorder is the mock recorder for MocksaltConverter.
+type MocksaltConverterMockRecorder struct {
+	mock *MocksaltConverter
+}
+
+// NewMocksaltConverter creates a new mock instance.
+func NewMocksaltConverter(ctrl *gomock.Controller) *MocksaltConverter {
+	mock := &MocksaltConverter{ctrl: ctrl}
+	mock.recorder = &MocksaltConverterMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MocksaltConverter) EXPECT() *MocksaltConverterMockRecorder {
+	return m.recorder
+}
+
+// DecodeSalt mocks base method.
+func (m *MocksaltConverter) DecodeSalt(arg0 string) ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DecodeSalt", arg0)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DecodeSalt indicates an expected call of DecodeSalt.
+func (mr *MocksaltConverterMockRecorder) DecodeSalt(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DecodeSalt", reflect.TypeOf((*MocksaltConverter)(nil).DecodeSalt), arg0)
+}
+
+// EncodeSalt mocks base method.
+func (m *MocksaltConverter) EncodeSalt(arg0 []byte) string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EncodeSalt", arg0)
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// EncodeSalt indicates an expected call of EncodeSalt.
+func (mr *MocksaltConverterMockRecorder) EncodeSalt(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EncodeSalt", reflect.TypeOf((*MocksaltConverter)(nil).EncodeSalt), arg0)
+}
+
+// MockkeyDeriver is a mock of keyDeriver interface.
+type MockkeyDeriver struct {
+	ctrl     *gomock.Controller
+	recorder *MockkeyDeriverMockRecorder
+}
+
+// MockkeyDeriverMockRecorder is the mock recorder for MockkeyDeriver.
+type MockkeyDeriverMockRecorder struct {
+	mock *MockkeyDeriver
+}
+
+// NewMockkeyDeriver creates a new mock instance.
+func NewMockkeyDeriver(ctrl *gomock.Controller) *MockkeyDeriver {
+	mock := &MockkeyDeriver{ctrl: ctrl}
+	mock.recorder = &MockkeyDeriverMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockkeyDeriver) EXPECT() *MockkeyDeriverMockRecorder {
+	return m.recorder
+}
+
+// DeriveKeyFromPasswordAndSalt mocks base method.
+func (m *MockkeyDeriver) DeriveKeyFromPasswordAndSalt(arg0 string, arg1 []byte) []byte {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeriveKeyFromPasswordAndSalt", arg0, arg1)
+	ret0, _ := ret[0].([]byte)
+	return ret0
+}
+
+// DeriveKeyFromPasswordAndSalt indicates an expected call of DeriveKeyFromPasswordAndSalt.
+func (mr *MockkeyDeriverMockRecorder) DeriveKeyFromPasswordAndSalt(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeriveKeyFromPasswordAndSalt", reflect.TypeOf((*MockkeyDeriver)(nil).DeriveKeyFromPasswordAndSalt), arg0, arg1)
+}
+
 // MockkeyProvider is a mock of keyProvider interface.
 type MockkeyProvider struct {
 	ctrl     *gomock.Controller
@@ -88,6 +215,49 @@ func (m *MockkeyProvider) EXPECT() *MockkeyProviderMockRecorder {
 	return m.recorder
 }
 
+// DecodeSalt mocks base method.
+func (m *MockkeyProvider) DecodeSalt(arg0 string) ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DecodeSalt", arg0)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DecodeSalt indicates an expected call of DecodeSalt.
+func (mr *MockkeyProviderMockRecorder) DecodeSalt(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DecodeSalt", reflect.TypeOf((*MockkeyProvider)(nil).DecodeSalt), arg0)
+}
+
+// DeriveKeyFromPasswordAndSalt mocks base method.
+func (m *MockkeyProvider) DeriveKeyFromPasswordAndSalt(arg0 string, arg1 []byte) []byte {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeriveKeyFromPasswordAndSalt", arg0, arg1)
+	ret0, _ := ret[0].([]byte)
+	return ret0
+}
+
+// DeriveKeyFromPasswordAndSalt indicates an expected call of DeriveKeyFromPasswordAndSalt.
+func (mr *MockkeyProviderMockRecorder) DeriveKeyFromPasswordAndSalt(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeriveKeyFromPasswordAndSalt", reflect.TypeOf((*MockkeyProvider)(nil).DeriveKeyFromPasswordAndSalt), arg0, arg1)
+}
+
+// EncodeSalt mocks base method.
+func (m *MockkeyProvider) EncodeSalt(arg0 []byte) string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EncodeSalt", arg0)
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// EncodeSalt indicates an expected call of EncodeSalt.
+func (mr *MockkeyProviderMockRecorder) EncodeSalt(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EncodeSalt", reflect.TypeOf((*MockkeyProvider)(nil).EncodeSalt), arg0)
+}
+
 // GenerateSalt mocks base method.
 func (m *MockkeyProvider) GenerateSalt() ([]byte, error) {
 	m.ctrl.T.Helper()
@@ -101,4 +271,41 @@ func (m *MockkeyProvider) GenerateSalt() ([]byte, error) {
 func (mr *MockkeyProviderMockRecorder) GenerateSalt() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenerateSalt", reflect.TypeOf((*MockkeyProvider)(nil).GenerateSalt))
+}
+
+// Mockcrypter is a mock of crypter interface.
+type Mockcrypter struct {
+	ctrl     *gomock.Controller
+	recorder *MockcrypterMockRecorder
+}
+
+// MockcrypterMockRecorder is the mock recorder for Mockcrypter.
+type MockcrypterMockRecorder struct {
+	mock *Mockcrypter
+}
+
+// NewMockcrypter creates a new mock instance.
+func NewMockcrypter(ctrl *gomock.Controller) *Mockcrypter {
+	mock := &Mockcrypter{ctrl: ctrl}
+	mock.recorder = &MockcrypterMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *Mockcrypter) EXPECT() *MockcrypterMockRecorder {
+	return m.recorder
+}
+
+// SetKey mocks base method.
+func (m *Mockcrypter) SetKey(key []byte) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetKey", key)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SetKey indicates an expected call of SetKey.
+func (mr *MockcrypterMockRecorder) SetKey(key interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetKey", reflect.TypeOf((*Mockcrypter)(nil).SetKey), key)
 }
