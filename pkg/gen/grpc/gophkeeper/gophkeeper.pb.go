@@ -25,6 +25,7 @@ type RegisterRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Username      string                 `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
 	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	Salt          string                 `protobuf:"bytes,3,opt,name=salt,proto3" json:"salt,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -69,6 +70,13 @@ func (x *RegisterRequest) GetUsername() string {
 func (x *RegisterRequest) GetPassword() string {
 	if x != nil {
 		return x.Password
+	}
+	return ""
+}
+
+func (x *RegisterRequest) GetSalt() string {
+	if x != nil {
+		return x.Salt
 	}
 	return ""
 }
@@ -129,6 +137,7 @@ type AuthResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Token         string                 `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
+	Salt          string                 `protobuf:"bytes,3,opt,name=salt,proto3" json:"salt,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -177,21 +186,30 @@ func (x *AuthResponse) GetToken() string {
 	return ""
 }
 
+func (x *AuthResponse) GetSalt() string {
+	if x != nil {
+		return x.Salt
+	}
+	return ""
+}
+
 var File_gophkeeper_proto protoreflect.FileDescriptor
 
 const file_gophkeeper_proto_rawDesc = "" +
 	"\n" +
 	"\x10gophkeeper.proto\x12\n" +
-	"gophkeeper\"I\n" +
+	"gophkeeper\"]\n" +
 	"\x0fRegisterRequest\x12\x1a\n" +
 	"\busername\x18\x01 \x01(\tR\busername\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"F\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\x12\x12\n" +
+	"\x04salt\x18\x03 \x01(\tR\x04salt\"F\n" +
 	"\fLoginRequest\x12\x1a\n" +
 	"\busername\x18\x01 \x01(\tR\busername\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"=\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\"Q\n" +
 	"\fAuthResponse\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x14\n" +
-	"\x05token\x18\x02 \x01(\tR\x05token2\x91\x01\n" +
+	"\x05token\x18\x02 \x01(\tR\x05token\x12\x12\n" +
+	"\x04salt\x18\x03 \x01(\tR\x04salt2\x91\x01\n" +
 	"\vUserService\x12C\n" +
 	"\bRegister\x12\x1b.gophkeeper.RegisterRequest\x1a\x18.gophkeeper.AuthResponse\"\x00\x12=\n" +
 	"\x05Login\x12\x18.gophkeeper.LoginRequest\x1a\x18.gophkeeper.AuthResponse\"\x00B>Z<github.com/rycln/gokeep/internal/shared/proto/gen/gophkeeperb\x06proto3"
