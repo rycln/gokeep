@@ -1,11 +1,11 @@
 -- +goose Up
 -- +goose StatementBegin
 ALTER TABLE users 
-ADD COLUMN salt VARCHAR(16) NOT NULL;
+ALTER COLUMN salt TYPE VARCHAR(255);
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
 ALTER TABLE users 
-DROP COLUMN salt;
+ALTER COLUMN salt TYPE VARCHAR(16);
 -- +goose StatementEnd
