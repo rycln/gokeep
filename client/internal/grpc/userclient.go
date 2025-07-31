@@ -21,10 +21,11 @@ func NewUserClient(conn *grpc.ClientConn) *AuthClient {
 }
 
 // Register performs user registration via gRPC
-func (c *AuthClient) Register(ctx context.Context, req *models.UserAuthReq) (*models.User, error) {
+func (c *AuthClient) Register(ctx context.Context, req *models.UserRegReq) (*models.User, error) {
 	res, err := c.client.Register(ctx, &pb.RegisterRequest{
 		Username: req.Username,
 		Password: req.Password,
+		Salt:     req.Salt,
 	})
 
 	if err != nil {
@@ -32,13 +33,14 @@ func (c *AuthClient) Register(ctx context.Context, req *models.UserAuthReq) (*mo
 	}
 
 	return &models.User{
-		ID:  models.UserID(res.UserId),
-		JWT: res.Token,
+		ID:   models.UserID(res.UserId),
+		JWT:  res.Token,
+		Salt: res.Salt,
 	}, err
 }
 
 // Login performs user authentication via gRPC
-func (c *AuthClient) Login(ctx context.Context, req *models.UserAuthReq) (*models.User, error) {
+func (c *AuthClient) Login(ctx context.Context, req *models.UserLoginReq) (*models.User, error) {
 	res, err := c.client.Login(ctx, &pb.LoginRequest{
 		Username: req.Username,
 		Password: req.Password,
@@ -49,7 +51,8 @@ func (c *AuthClient) Login(ctx context.Context, req *models.UserAuthReq) (*model
 	}
 
 	return &models.User{
-		ID:  models.UserID(res.UserId),
-		JWT: res.Token,
+		ID:   models.UserID(res.UserId),
+		JWT:  res.Token,
+		Salt: res.Salt,
 	}, err
 }

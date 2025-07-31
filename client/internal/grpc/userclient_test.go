@@ -17,6 +17,7 @@ const (
 	testToken  = "test.jwt.token"
 	testUser   = "testuser"
 	testPass   = "testpass"
+	testSalt   = "salt"
 )
 
 type mockUserServiceClient struct {
@@ -45,9 +46,10 @@ func TestNewUserClient(t *testing.T) {
 
 func TestAuthClient_Register(t *testing.T) {
 	ctx := context.Background()
-	testReq := &models.UserAuthReq{
+	testReq := &models.UserRegReq{
 		Username: testUser,
 		Password: testPass,
+		Salt:     testSalt,
 	}
 
 	t.Run("successful registration", func(t *testing.T) {
@@ -55,9 +57,11 @@ func TestAuthClient_Register(t *testing.T) {
 			registerFunc: func(ctx context.Context, in *gophkeeper.RegisterRequest, opts ...grpc.CallOption) (*gophkeeper.AuthResponse, error) {
 				assert.Equal(t, testUser, in.Username)
 				assert.Equal(t, testPass, in.Password)
+				assert.Equal(t, testSalt, in.Salt)
 				return &gophkeeper.AuthResponse{
 					UserId: testUserID,
 					Token:  testToken,
+					Salt:   testSalt,
 				}, nil
 			},
 		}
@@ -68,6 +72,7 @@ func TestAuthClient_Register(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, models.UserID(testUserID), user.ID)
 		assert.Equal(t, testToken, user.JWT)
+		assert.Equal(t, testSalt, user.Salt)
 	})
 
 	t.Run("registration error", func(t *testing.T) {
@@ -88,7 +93,7 @@ func TestAuthClient_Register(t *testing.T) {
 
 func TestAuthClient_Login(t *testing.T) {
 	ctx := context.Background()
-	testReq := &models.UserAuthReq{
+	testReq := &models.UserLoginReq{
 		Username: testUser,
 		Password: testPass,
 	}
@@ -101,6 +106,7 @@ func TestAuthClient_Login(t *testing.T) {
 				return &gophkeeper.AuthResponse{
 					UserId: testUserID,
 					Token:  testToken,
+					Salt:   testSalt,
 				}, nil
 			},
 		}
@@ -111,6 +117,7 @@ func TestAuthClient_Login(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, models.UserID(testUserID), user.ID)
 		assert.Equal(t, testToken, user.JWT)
+		assert.Equal(t, testSalt, user.Salt)
 	})
 
 	t.Run("login error", func(t *testing.T) {
