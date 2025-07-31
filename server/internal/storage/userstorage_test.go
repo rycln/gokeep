@@ -17,6 +17,7 @@ import (
 
 const (
 	testUserID = "550e8400-e29b-41d4-a716-446655440000"
+	testSalt   = "salt"
 )
 
 var (
@@ -34,13 +35,14 @@ func TestUserStorage_AddUser(t *testing.T) {
 		ID:       testUserID,
 		Username: "testuser",
 		PassHash: "hashed_password",
+		Salt:     testSalt,
 	}
 
 	expectedQuery := regexp.QuoteMeta(sqlAddUser)
 
 	t.Run("successful user creation", func(t *testing.T) {
 		mock.ExpectExec(expectedQuery).
-			WithArgs(testUser.ID, testUser.Username, testUser.PassHash).
+			WithArgs(testUser.ID, testUser.Username, testUser.PassHash, testUser.Salt).
 			WillReturnResult(sqlmock.NewResult(0, 1))
 
 		err := strg.AddUser(context.Background(), testUser)
@@ -54,7 +56,7 @@ func TestUserStorage_AddUser(t *testing.T) {
 		}
 
 		mock.ExpectExec(expectedQuery).
-			WithArgs(testUser.ID, testUser.Username, testUser.PassHash).
+			WithArgs(testUser.ID, testUser.Username, testUser.PassHash, testUser.Salt).
 			WillReturnError(pgErr)
 
 		err := strg.AddUser(context.Background(), testUser)
@@ -64,7 +66,7 @@ func TestUserStorage_AddUser(t *testing.T) {
 
 	t.Run("general database error", func(t *testing.T) {
 		mock.ExpectExec(expectedQuery).
-			WithArgs(testUser.ID, testUser.Username, testUser.PassHash).
+			WithArgs(testUser.ID, testUser.Username, testUser.PassHash, testUser.Salt).
 			WillReturnError(errTest)
 
 		err := strg.AddUser(context.Background(), testUser)
@@ -84,13 +86,14 @@ func TestUserStorage_GetUserByUsername(t *testing.T) {
 		ID:       testUserID,
 		Username: "testuser",
 		PassHash: "hashed_password",
+		Salt:     testSalt,
 	}
 
 	expectedQuery := regexp.QuoteMeta(sqlGetUserByUsername)
 
 	t.Run("successful user retrieval", func(t *testing.T) {
-		rows := mock.NewRows([]string{"id", "username", "pass_hash"}).
-			AddRow(testUser.ID, testUser.Username, testUser.PassHash)
+		rows := mock.NewRows([]string{"id", "username", "pass_hash", "salt"}).
+			AddRow(testUser.ID, testUser.Username, testUser.PassHash, testUser.Salt)
 
 		mock.ExpectQuery(expectedQuery).
 			WithArgs(testUser.Username).

@@ -23,7 +23,7 @@ func NewUserStorage(db *sql.DB) *UserStorage {
 
 // AddUser persists a new user to the database
 func (s *UserStorage) AddUser(ctx context.Context, user *models.UserDB) error {
-	_, err := s.db.ExecContext(ctx, sqlAddUser, user.ID, user.Username, user.PassHash)
+	_, err := s.db.ExecContext(ctx, sqlAddUser, user.ID, user.Username, user.PassHash, user.Salt)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
@@ -39,7 +39,7 @@ func (s *UserStorage) GetUserByUsername(ctx context.Context, username string) (*
 	row := s.db.QueryRowContext(ctx, sqlGetUserByUsername, username)
 
 	var userDB models.UserDB
-	err := row.Scan(&userDB.ID, &userDB.Username, &userDB.PassHash)
+	err := row.Scan(&userDB.ID, &userDB.Username, &userDB.PassHash, &userDB.Salt)
 
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
