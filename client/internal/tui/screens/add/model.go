@@ -14,6 +14,8 @@ import (
 	"github.com/rycln/gokeep/shared/models"
 )
 
+//go:generate mockgen -source=$GOFILE -destination=./mocks/mock_$GOFILE -package=mocks
+
 // state represents the current screen state
 type state int
 
