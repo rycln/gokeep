@@ -13,8 +13,8 @@ import (
 
 // userService defines the required domain operations for user management
 type userService interface {
-	CreateUser(context.Context, *models.UserAuthReq) (*models.User, error) // User registration
-	AuthUser(context.Context, *models.UserAuthReq) (*models.User, error)   // User authentication
+	CreateUser(context.Context, *models.UserRegReq) (*models.User, error) // User registration
+	AuthUser(context.Context, *models.UserLoginReq) (*models.User, error) // User authentication
 }
 
 // Register handles user registration requests
@@ -22,9 +22,10 @@ func (h *UserHandler) Register(
 	ctx context.Context,
 	req *pb.RegisterRequest,
 ) (*pb.AuthResponse, error) {
-	authReq := &models.UserAuthReq{
+	authReq := &models.UserRegReq{
 		Username: req.Username,
 		Password: req.Password,
+		Salt:     req.Salt,
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, h.timeout)
@@ -46,7 +47,7 @@ func (h *UserHandler) Login(
 	ctx context.Context,
 	req *pb.LoginRequest,
 ) (*pb.AuthResponse, error) {
-	authReq := &models.UserAuthReq{
+	authReq := &models.UserLoginReq{
 		Username: req.Username,
 		Password: req.Password,
 	}

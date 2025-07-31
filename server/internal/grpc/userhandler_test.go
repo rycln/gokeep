@@ -19,6 +19,7 @@ import (
 const (
 	testUserID  = "550e8400-e29b-41d4-a716-446655440000"
 	testJWT     = "test.jwt.token"
+	testSalt    = "salt"
 	testTimeout = 5 * time.Second
 )
 
@@ -26,11 +27,13 @@ func TestUserHandler_Register(t *testing.T) {
 	testReq := &gophkeeper.RegisterRequest{
 		Username: "testuser",
 		Password: "testpass",
+		Salt:     testSalt,
 	}
 
-	expectedAuthReq := &models.UserAuthReq{
+	expectedAuthReq := &models.UserRegReq{
 		Username: testReq.Username,
 		Password: testReq.Password,
+		Salt:     testReq.Salt,
 	}
 
 	t.Run("successful registration", func(t *testing.T) {
@@ -80,7 +83,7 @@ func TestUserHandler_Login(t *testing.T) {
 		Password: "testpass",
 	}
 
-	expectedAuthReq := &models.UserAuthReq{
+	expectedAuthReq := &models.UserLoginReq{
 		Username: testReq.Username,
 		Password: testReq.Password,
 	}
@@ -93,8 +96,9 @@ func TestUserHandler_Login(t *testing.T) {
 		handler := NewGophKeeperServer(mockService, testTimeout)
 
 		expectedUser := &models.User{
-			ID:  models.UserID(testUserID),
-			JWT: testJWT,
+			ID:   models.UserID(testUserID),
+			JWT:  testJWT,
+			Salt: testSalt,
 		}
 
 		mockService.EXPECT().

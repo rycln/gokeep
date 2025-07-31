@@ -36,7 +36,7 @@ func (m *MockuserService) EXPECT() *MockuserServiceMockRecorder {
 }
 
 // AuthUser mocks base method.
-func (m *MockuserService) AuthUser(arg0 context.Context, arg1 *models.UserAuthReq) (*models.User, error) {
+func (m *MockuserService) AuthUser(arg0 context.Context, arg1 *models.UserLoginReq) (*models.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AuthUser", arg0, arg1)
 	ret0, _ := ret[0].(*models.User)
@@ -51,7 +51,7 @@ func (mr *MockuserServiceMockRecorder) AuthUser(arg0, arg1 interface{}) *gomock.
 }
 
 // CreateUser mocks base method.
-func (m *MockuserService) CreateUser(arg0 context.Context, arg1 *models.UserAuthReq) (*models.User, error) {
+func (m *MockuserService) CreateUser(arg0 context.Context, arg1 *models.UserRegReq) (*models.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateUser", arg0, arg1)
 	ret0, _ := ret[0].(*models.User)
