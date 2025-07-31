@@ -75,7 +75,7 @@ func handleAuthModel(m rootModel, msg tea.Msg) (rootModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case auth.AuthSuccessMsg:
 		m.vaultModel.SetUser(msg.User)
-		m.current = VaultModel // Switch to vault after auth
+		m.current = VaultModel
 		return m, nil
 	default:
 		updated, cmd := m.authModel.Update(msg)
