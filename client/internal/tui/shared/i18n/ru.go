@@ -9,7 +9,7 @@ const (
 	CommonPressAnyKey = "Нажмите любую клавишу..."
 
 	InputDataPrompt     = "Введите данные:\n\n"
-	InputSavePathPrompt = "Введите путь сохранения файла:\n\n>%s\n\n" + CommonPressEnter
+	InputSavePathPrompt = "Введите путь сохранения файла:\n\n>%s\n\n" + CommonPressEnter + "\n\n" + CommonPressESC
 
 	VaultTitle                 = "GophKeeper"
 	VaultListTitleNameSingular = "Объект"

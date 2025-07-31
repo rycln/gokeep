@@ -233,6 +233,8 @@ func handleBinaryInputState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.Type {
+		case tea.KeyEsc:
+			m.state = DetailState
 		case tea.KeyEnter:
 			m.state = ProcessingState
 			return m, m.getContent()
