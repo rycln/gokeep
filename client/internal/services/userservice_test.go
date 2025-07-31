@@ -17,6 +17,7 @@ const (
 	testToken  = "test.jwt.token"
 	testUser   = "testuser"
 	testPass   = "testpass"
+	testSalt   = "salt"
 )
 
 func TestNewAuthService(t *testing.T) {
@@ -34,14 +35,16 @@ func TestNewAuthService(t *testing.T) {
 
 func TestUserService_UserRegister(t *testing.T) {
 	ctx := context.Background()
-	testReq := &models.UserAuthReq{
+	testReq := &models.UserRegReq{
 		Username: testUser,
 		Password: testPass,
+		Salt:     testSalt,
 	}
 
 	expectedUser := &models.User{
-		ID:  models.UserID(testUserID),
-		JWT: testToken,
+		ID:   models.UserID(testUserID),
+		JWT:  testToken,
+		Salt: testSalt,
 	}
 
 	t.Run("successful registration", func(t *testing.T) {
@@ -80,14 +83,15 @@ func TestUserService_UserRegister(t *testing.T) {
 
 func TestUserService_UserLogin(t *testing.T) {
 	ctx := context.Background()
-	testReq := &models.UserAuthReq{
+	testReq := &models.UserLoginReq{
 		Username: testUser,
 		Password: testPass,
 	}
 
 	expectedUser := &models.User{
-		ID:  models.UserID(testUserID),
-		JWT: testToken,
+		ID:   models.UserID(testUserID),
+		JWT:  testToken,
+		Salt: testSalt,
 	}
 
 	t.Run("successful login", func(t *testing.T) {

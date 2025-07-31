@@ -10,8 +10,8 @@ import (
 
 // AuthAPI defines the interface for authentication operations
 type AuthAPI interface {
-	Register(context.Context, *models.UserAuthReq) (*models.User, error)
-	Login(context.Context, *models.UserAuthReq) (*models.User, error)
+	Register(context.Context, *models.UserRegReq) (*models.User, error)
+	Login(context.Context, *models.UserLoginReq) (*models.User, error)
 }
 
 // UserService handles user authentication business logic
@@ -27,11 +27,11 @@ func NewAuthService(api AuthAPI) *UserService {
 }
 
 // UserRegister handles user registration flow
-func (s *UserService) UserRegister(ctx context.Context, req *models.UserAuthReq) (*models.User, error) {
+func (s *UserService) UserRegister(ctx context.Context, req *models.UserRegReq) (*models.User, error) {
 	return s.api.Register(ctx, req)
 }
 
 // UserLogin handles user authentication flow
-func (s *UserService) UserLogin(ctx context.Context, req *models.UserAuthReq) (*models.User, error) {
+func (s *UserService) UserLogin(ctx context.Context, req *models.UserLoginReq) (*models.User, error) {
 	return s.api.Login(ctx, req)
 }

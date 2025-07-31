@@ -36,7 +36,7 @@ func (m *MockAuthAPI) EXPECT() *MockAuthAPIMockRecorder {
 }
 
 // Login mocks base method.
-func (m *MockAuthAPI) Login(arg0 context.Context, arg1 *models.UserAuthReq) (*models.User, error) {
+func (m *MockAuthAPI) Login(arg0 context.Context, arg1 *models.UserLoginReq) (*models.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Login", arg0, arg1)
 	ret0, _ := ret[0].(*models.User)
@@ -51,7 +51,7 @@ func (mr *MockAuthAPIMockRecorder) Login(arg0, arg1 interface{}) *gomock.Call {
 }
 
 // Register mocks base method.
-func (m *MockAuthAPI) Register(arg0 context.Context, arg1 *models.UserAuthReq) (*models.User, error) {
+func (m *MockAuthAPI) Register(arg0 context.Context, arg1 *models.UserRegReq) (*models.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Register", arg0, arg1)
 	ret0, _ := ret[0].(*models.User)
