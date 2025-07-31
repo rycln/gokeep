@@ -43,7 +43,7 @@ func NewUserService(strg userStorager, hasher passHasher, jwt jwtService) *UserS
 }
 
 // CreateUser handles new user registration:
-func (s *UserService) CreateUser(ctx context.Context, req *models.UserAuthReq) (*models.User, error) {
+func (s *UserService) CreateUser(ctx context.Context, req *models.UserRegReq) (*models.User, error) {
 	hash, err := s.hasher.Hash(req.Password)
 	if err != nil {
 		return nil, err
@@ -55,6 +55,7 @@ func (s *UserService) CreateUser(ctx context.Context, req *models.UserAuthReq) (
 		ID:       uid,
 		Username: req.Username,
 		PassHash: hash,
+		Salt:     req.Salt,
 	}
 
 	err = s.strg.AddUser(ctx, userDB)
@@ -68,13 +69,14 @@ func (s *UserService) CreateUser(ctx context.Context, req *models.UserAuthReq) (
 	}
 
 	return &models.User{
-		ID:  uid,
-		JWT: jwt,
+		ID:   uid,
+		JWT:  jwt,
+		Salt: req.Salt,
 	}, nil
 }
 
 // AuthUser handles user authentication:
-func (s *UserService) AuthUser(ctx context.Context, req *models.UserAuthReq) (*models.User, error) {
+func (s *UserService) AuthUser(ctx context.Context, req *models.UserLoginReq) (*models.User, error) {
 	userDB, err := s.strg.GetUserByUsername(ctx, req.Username)
 	if err != nil {
 		return nil, err
@@ -91,7 +93,8 @@ func (s *UserService) AuthUser(ctx context.Context, req *models.UserAuthReq) (*m
 	}
 
 	return &models.User{
-		ID:  userDB.ID,
-		JWT: jwt,
+		ID:   userDB.ID,
+		JWT:  jwt,
+		Salt: userDB.Salt,
 	}, nil
 }

@@ -17,6 +17,7 @@ const (
 	testJWTToken     = "test.jwt.token"
 	testPassword     = "secret"
 	testPasswordHash = "hashed_secret"
+	testSalt         = "salt"
 )
 
 var (
@@ -32,9 +33,10 @@ func TestUserService_CreateUser(t *testing.T) {
 	mJWT := mocks.NewMockjwtService(ctrl)
 
 	t.Run("successful user creation", func(t *testing.T) {
-		req := &models.UserAuthReq{
+		req := &models.UserRegReq{
 			Username: "testuser",
 			Password: testPassword,
+			Salt:     testSalt,
 		}
 
 		gomock.InOrder(
@@ -65,9 +67,10 @@ func TestUserService_CreateUser(t *testing.T) {
 	})
 
 	t.Run("password hashing failed", func(t *testing.T) {
-		req := &models.UserAuthReq{
+		req := &models.UserRegReq{
 			Username: "testuser",
 			Password: testPassword,
+			Salt:     testSalt,
 		}
 
 		mHasher.EXPECT().Hash(req.Password).Return("", errTest)
@@ -78,9 +81,10 @@ func TestUserService_CreateUser(t *testing.T) {
 	})
 
 	t.Run("storage add user failed", func(t *testing.T) {
-		req := &models.UserAuthReq{
+		req := &models.UserRegReq{
 			Username: "testuser",
 			Password: testPassword,
+			Salt:     testSalt,
 		}
 
 		gomock.InOrder(
@@ -94,9 +98,10 @@ func TestUserService_CreateUser(t *testing.T) {
 	})
 
 	t.Run("JWT generation failed", func(t *testing.T) {
-		req := &models.UserAuthReq{
+		req := &models.UserRegReq{
 			Username: "testuser",
 			Password: testPassword,
+			Salt:     testSalt,
 		}
 
 		gomock.InOrder(
@@ -120,7 +125,7 @@ func TestUserService_AuthUser(t *testing.T) {
 	mJWT := mocks.NewMockjwtService(ctrl)
 
 	t.Run("successful authentication", func(t *testing.T) {
-		req := &models.UserAuthReq{
+		req := &models.UserLoginReq{
 			Username: "testuser",
 			Password: testPassword,
 		}
@@ -129,11 +134,13 @@ func TestUserService_AuthUser(t *testing.T) {
 			ID:       models.UserID(testUserID),
 			Username: req.Username,
 			PassHash: testPasswordHash,
+			Salt:     testSalt,
 		}
 
 		expectedUser := &models.User{
-			ID:  models.UserID(testUserID),
-			JWT: testJWTToken,
+			ID:   models.UserID(testUserID),
+			JWT:  testJWTToken,
+			Salt: testSalt,
 		}
 
 		gomock.InOrder(
@@ -149,7 +156,7 @@ func TestUserService_AuthUser(t *testing.T) {
 	})
 
 	t.Run("user not found", func(t *testing.T) {
-		req := &models.UserAuthReq{
+		req := &models.UserLoginReq{
 			Username: "nonexistent",
 			Password: testPassword,
 		}
@@ -162,7 +169,7 @@ func TestUserService_AuthUser(t *testing.T) {
 	})
 
 	t.Run("password mismatch", func(t *testing.T) {
-		req := &models.UserAuthReq{
+		req := &models.UserLoginReq{
 			Username: "testuser",
 			Password: "wrong_password",
 		}
@@ -171,6 +178,7 @@ func TestUserService_AuthUser(t *testing.T) {
 			ID:       models.UserID(testUserID),
 			Username: req.Username,
 			PassHash: testPasswordHash,
+			Salt:     testSalt,
 		}
 
 		gomock.InOrder(
@@ -184,7 +192,7 @@ func TestUserService_AuthUser(t *testing.T) {
 	})
 
 	t.Run("JWT generation failed", func(t *testing.T) {
-		req := &models.UserAuthReq{
+		req := &models.UserLoginReq{
 			Username: "testuser",
 			Password: testPassword,
 		}
@@ -193,6 +201,7 @@ func TestUserService_AuthUser(t *testing.T) {
 			ID:       models.UserID(testUserID),
 			Username: req.Username,
 			PassHash: testPasswordHash,
+			Salt:     testSalt,
 		}
 
 		gomock.InOrder(
