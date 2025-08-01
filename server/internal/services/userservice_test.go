@@ -7,9 +7,11 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
+	"github.com/rycln/gokeep/server/internal/contextkeys"
 	"github.com/rycln/gokeep/server/internal/services/mocks"
 	"github.com/rycln/gokeep/shared/models"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -28,9 +30,9 @@ func TestUserService_CreateUser(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mStrg := mocks.NewMockuserStorager(ctrl)
+	mStrg := mocks.NewMockuserStorage(ctrl)
 	mHasher := mocks.NewMockpassHasher(ctrl)
-	mJWT := mocks.NewMockjwtService(ctrl)
+	mJWT := mocks.NewMockjwtCreator(ctrl)
 
 	t.Run("successful user creation", func(t *testing.T) {
 		req := &models.UserRegReq{
@@ -120,9 +122,9 @@ func TestUserService_AuthUser(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mStrg := mocks.NewMockuserStorager(ctrl)
+	mStrg := mocks.NewMockuserStorage(ctrl)
 	mHasher := mocks.NewMockpassHasher(ctrl)
-	mJWT := mocks.NewMockjwtService(ctrl)
+	mJWT := mocks.NewMockjwtCreator(ctrl)
 
 	t.Run("successful authentication", func(t *testing.T) {
 		req := &models.UserLoginReq{
@@ -213,5 +215,43 @@ func TestUserService_AuthUser(t *testing.T) {
 		s := NewUserService(mStrg, mHasher, mJWT)
 		_, err := s.AuthUser(context.Background(), req)
 		assert.Error(t, err)
+	})
+}
+
+func TestUserService_GetUserIDFromCtx(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	service := &UserService{}
+
+	testUserID := models.UserID("550e8400-e29b-41d4-a716-446655440000")
+
+	t.Run("successfully get user id from context", func(t *testing.T) {
+		ctx := context.WithValue(context.Background(), contextkeys.UserID, testUserID)
+
+		uid, err := service.GetUserIDFromCtx(ctx)
+
+		require.NoError(t, err)
+		assert.Equal(t, testUserID, uid)
+	})
+
+	t.Run("error when no user id in context", func(t *testing.T) {
+		ctx := context.Background()
+
+		uid, err := service.GetUserIDFromCtx(ctx)
+
+		require.Error(t, err)
+		assert.Equal(t, models.UserID(""), uid)
+		assert.Equal(t, errNoUserID, err)
+	})
+
+	t.Run("error when wrong value type in context", func(t *testing.T) {
+		ctx := context.WithValue(context.Background(), contextkeys.UserID, "wrong-type")
+
+		uid, err := service.GetUserIDFromCtx(ctx)
+
+		require.Error(t, err)
+		assert.Equal(t, models.UserID(""), uid)
+		assert.Equal(t, errNoUserID, err)
 	})
 }

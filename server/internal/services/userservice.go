@@ -4,13 +4,14 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/rycln/gokeep/server/internal/contextkeys"
 	"github.com/rycln/gokeep/shared/models"
 )
 
 //go:generate mockgen -source=$GOFILE -destination=./mocks/mock_$GOFILE -package=mocks
 
 // userStorager defines persistence operations for user data
-type userStorager interface {
+type userStorage interface {
 	AddUser(context.Context, *models.UserDB) error
 	GetUserByUsername(context.Context, string) (*models.UserDB, error)
 }
@@ -22,19 +23,19 @@ type passHasher interface {
 }
 
 // jwtService defines JWT token operations
-type jwtService interface {
+type jwtCreator interface {
 	NewJWTString(models.UserID) (string, error)
 }
 
 // UserService implements user authentication business logic
 type UserService struct {
-	strg   userStorager
+	strg   userStorage
 	hasher passHasher
-	jwt    jwtService
+	jwt    jwtCreator
 }
 
 // NewUserService constructs a new UserService with required dependencies
-func NewUserService(strg userStorager, hasher passHasher, jwt jwtService) *UserService {
+func NewUserService(strg userStorage, hasher passHasher, jwt jwtCreator) *UserService {
 	return &UserService{
 		strg:   strg,
 		hasher: hasher,
@@ -97,4 +98,13 @@ func (s *UserService) AuthUser(ctx context.Context, req *models.UserLoginReq) (*
 		JWT:  jwt,
 		Salt: userDB.Salt,
 	}, nil
+}
+
+// GetUserIDFromCtx extracts user ID from context set by Auth middleware.
+func (s *UserService) GetUserIDFromCtx(ctx context.Context) (models.UserID, error) {
+	uid, ok := ctx.Value(contextkeys.UserID).(models.UserID)
+	if !ok {
+		return "", errNoUserID
+	}
+	return uid, nil
 }

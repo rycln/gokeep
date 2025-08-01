@@ -12,31 +12,31 @@ import (
 	models "github.com/rycln/gokeep/shared/models"
 )
 
-// MockuserStorager is a mock of userStorager interface.
-type MockuserStorager struct {
+// MockuserStorage is a mock of userStorage interface.
+type MockuserStorage struct {
 	ctrl     *gomock.Controller
-	recorder *MockuserStoragerMockRecorder
+	recorder *MockuserStorageMockRecorder
 }
 
-// MockuserStoragerMockRecorder is the mock recorder for MockuserStorager.
-type MockuserStoragerMockRecorder struct {
-	mock *MockuserStorager
+// MockuserStorageMockRecorder is the mock recorder for MockuserStorage.
+type MockuserStorageMockRecorder struct {
+	mock *MockuserStorage
 }
 
-// NewMockuserStorager creates a new mock instance.
-func NewMockuserStorager(ctrl *gomock.Controller) *MockuserStorager {
-	mock := &MockuserStorager{ctrl: ctrl}
-	mock.recorder = &MockuserStoragerMockRecorder{mock}
+// NewMockuserStorage creates a new mock instance.
+func NewMockuserStorage(ctrl *gomock.Controller) *MockuserStorage {
+	mock := &MockuserStorage{ctrl: ctrl}
+	mock.recorder = &MockuserStorageMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockuserStorager) EXPECT() *MockuserStoragerMockRecorder {
+func (m *MockuserStorage) EXPECT() *MockuserStorageMockRecorder {
 	return m.recorder
 }
 
 // AddUser mocks base method.
-func (m *MockuserStorager) AddUser(arg0 context.Context, arg1 *models.UserDB) error {
+func (m *MockuserStorage) AddUser(arg0 context.Context, arg1 *models.UserDB) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddUser", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -44,13 +44,13 @@ func (m *MockuserStorager) AddUser(arg0 context.Context, arg1 *models.UserDB) er
 }
 
 // AddUser indicates an expected call of AddUser.
-func (mr *MockuserStoragerMockRecorder) AddUser(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockuserStorageMockRecorder) AddUser(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddUser", reflect.TypeOf((*MockuserStorager)(nil).AddUser), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddUser", reflect.TypeOf((*MockuserStorage)(nil).AddUser), arg0, arg1)
 }
 
 // GetUserByUsername mocks base method.
-func (m *MockuserStorager) GetUserByUsername(arg0 context.Context, arg1 string) (*models.UserDB, error) {
+func (m *MockuserStorage) GetUserByUsername(arg0 context.Context, arg1 string) (*models.UserDB, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserByUsername", arg0, arg1)
 	ret0, _ := ret[0].(*models.UserDB)
@@ -59,9 +59,9 @@ func (m *MockuserStorager) GetUserByUsername(arg0 context.Context, arg1 string) 
 }
 
 // GetUserByUsername indicates an expected call of GetUserByUsername.
-func (mr *MockuserStoragerMockRecorder) GetUserByUsername(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockuserStorageMockRecorder) GetUserByUsername(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByUsername", reflect.TypeOf((*MockuserStorager)(nil).GetUserByUsername), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByUsername", reflect.TypeOf((*MockuserStorage)(nil).GetUserByUsername), arg0, arg1)
 }
 
 // MockpassHasher is a mock of passHasher interface.
@@ -116,31 +116,31 @@ func (mr *MockpassHasherMockRecorder) Hash(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Hash", reflect.TypeOf((*MockpassHasher)(nil).Hash), arg0)
 }
 
-// MockjwtService is a mock of jwtService interface.
-type MockjwtService struct {
+// MockjwtCreator is a mock of jwtCreator interface.
+type MockjwtCreator struct {
 	ctrl     *gomock.Controller
-	recorder *MockjwtServiceMockRecorder
+	recorder *MockjwtCreatorMockRecorder
 }
 
-// MockjwtServiceMockRecorder is the mock recorder for MockjwtService.
-type MockjwtServiceMockRecorder struct {
-	mock *MockjwtService
+// MockjwtCreatorMockRecorder is the mock recorder for MockjwtCreator.
+type MockjwtCreatorMockRecorder struct {
+	mock *MockjwtCreator
 }
 
-// NewMockjwtService creates a new mock instance.
-func NewMockjwtService(ctrl *gomock.Controller) *MockjwtService {
-	mock := &MockjwtService{ctrl: ctrl}
-	mock.recorder = &MockjwtServiceMockRecorder{mock}
+// NewMockjwtCreator creates a new mock instance.
+func NewMockjwtCreator(ctrl *gomock.Controller) *MockjwtCreator {
+	mock := &MockjwtCreator{ctrl: ctrl}
+	mock.recorder = &MockjwtCreatorMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockjwtService) EXPECT() *MockjwtServiceMockRecorder {
+func (m *MockjwtCreator) EXPECT() *MockjwtCreatorMockRecorder {
 	return m.recorder
 }
 
 // NewJWTString mocks base method.
-func (m *MockjwtService) NewJWTString(arg0 models.UserID) (string, error) {
+func (m *MockjwtCreator) NewJWTString(arg0 models.UserID) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "NewJWTString", arg0)
 	ret0, _ := ret[0].(string)
@@ -149,7 +149,7 @@ func (m *MockjwtService) NewJWTString(arg0 models.UserID) (string, error) {
 }
 
 // NewJWTString indicates an expected call of NewJWTString.
-func (mr *MockjwtServiceMockRecorder) NewJWTString(arg0 interface{}) *gomock.Call {
+func (mr *MockjwtCreatorMockRecorder) NewJWTString(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewJWTString", reflect.TypeOf((*MockjwtService)(nil).NewJWTString), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewJWTString", reflect.TypeOf((*MockjwtCreator)(nil).NewJWTString), arg0)
 }
