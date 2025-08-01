@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"strings"
 
 	pb "github.com/rycln/gokeep/pkg/gen/grpc/gophkeeper"
 	"github.com/rycln/gokeep/shared/models"
@@ -15,6 +16,11 @@ import (
 type userService interface {
 	CreateUser(context.Context, *models.UserRegReq) (*models.User, error) // User registration
 	AuthUser(context.Context, *models.UserLoginReq) (*models.User, error) // User authentication
+}
+
+// authProvider defines authentication middleware function
+type authProvider interface {
+	AuthFunc(context.Context) (context.Context, error)
 }
 
 // Register handles user registration requests
@@ -73,5 +79,9 @@ func (s *GophKeeperServer) AuthFuncOverride(
 	ctx context.Context,
 	fullMethodName string,
 ) (context.Context, error) {
-	return ctx, nil
+	if strings.Contains(fullMethodName, "Register") || strings.Contains(fullMethodName, "Login") {
+		return ctx, nil
+	}
+
+	return s.auth.AuthFunc(ctx)
 }

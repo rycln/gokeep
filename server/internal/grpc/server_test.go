@@ -15,9 +15,10 @@ func TestNewGophKeeperServer(t *testing.T) {
 
 	mockUser := mocks.NewMockuserService(ctrl)
 	mockSync := mocks.NewMocksyncService(ctrl)
+	mockAuth := mocks.NewMockauthProvider(ctrl)
 
 	t.Run("should create new server instance", func(t *testing.T) {
-		server := NewGophKeeperServer(mockUser, mockSync, testTimeout)
+		server := NewGophKeeperServer(mockUser, mockSync, mockAuth, testTimeout)
 		assert.NotNil(t, server)
 		assert.Equal(t, mockUser, server.user)
 		assert.Equal(t, mockSync, server.sync)

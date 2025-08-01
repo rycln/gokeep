@@ -12,15 +12,22 @@ type GophKeeperServer struct {
 	pb.UnimplementedGophKeeperServer
 	user    userService
 	sync    syncService
+	auth    authProvider
 	timeout time.Duration
 }
 
 // NewGophKeeperServer constructs a new gRPC server instance with required dependencies.
 // Returns configured server ready for registration with gRPC
-func NewGophKeeperServer(user userService, sync syncService, timeout time.Duration) *GophKeeperServer {
+func NewGophKeeperServer(
+	user userService,
+	sync syncService,
+	auth authProvider,
+	timeout time.Duration,
+) *GophKeeperServer {
 	return &GophKeeperServer{
 		user:    user,
 		sync:    sync,
+		auth:    auth,
 		timeout: timeout,
 	}
 }

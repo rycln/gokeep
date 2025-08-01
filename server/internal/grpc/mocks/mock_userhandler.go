@@ -64,3 +64,41 @@ func (mr *MockuserServiceMockRecorder) CreateUser(arg0, arg1 interface{}) *gomoc
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockuserService)(nil).CreateUser), arg0, arg1)
 }
+
+// MockauthProvider is a mock of authProvider interface.
+type MockauthProvider struct {
+	ctrl     *gomock.Controller
+	recorder *MockauthProviderMockRecorder
+}
+
+// MockauthProviderMockRecorder is the mock recorder for MockauthProvider.
+type MockauthProviderMockRecorder struct {
+	mock *MockauthProvider
+}
+
+// NewMockauthProvider creates a new mock instance.
+func NewMockauthProvider(ctrl *gomock.Controller) *MockauthProvider {
+	mock := &MockauthProvider{ctrl: ctrl}
+	mock.recorder = &MockauthProviderMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockauthProvider) EXPECT() *MockauthProviderMockRecorder {
+	return m.recorder
+}
+
+// AuthFunc mocks base method.
+func (m *MockauthProvider) AuthFunc(arg0 context.Context) (context.Context, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AuthFunc", arg0)
+	ret0, _ := ret[0].(context.Context)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AuthFunc indicates an expected call of AuthFunc.
+func (mr *MockauthProviderMockRecorder) AuthFunc(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthFunc", reflect.TypeOf((*MockauthProvider)(nil).AuthFunc), arg0)
+}

@@ -27,7 +27,8 @@ func TestGophKeeperServer_Sync(t *testing.T) {
 
 		mockUser := mocks.NewMockuserService(ctrl)
 		mockSync := mocks.NewMocksyncService(ctrl)
-		handler := NewGophKeeperServer(mockUser, mockSync, testTimeout)
+		mockAuth := mocks.NewMockauthProvider(ctrl)
+		handler := NewGophKeeperServer(mockUser, mockSync, mockAuth, testTimeout)
 
 		req := &pb.SyncRequest{
 			Items: []*pb.Item{
@@ -95,7 +96,8 @@ func TestGophKeeperServer_Sync(t *testing.T) {
 
 		mockUser := mocks.NewMockuserService(ctrl)
 		mockSync := mocks.NewMocksyncService(ctrl)
-		handler := NewGophKeeperServer(mockUser, mockSync, testTimeout)
+		mockAuth := mocks.NewMockauthProvider(ctrl)
+		handler := NewGophKeeperServer(mockUser, mockSync, mockAuth, testTimeout)
 
 		req := &pb.SyncRequest{Items: []*pb.Item{}}
 
@@ -115,7 +117,8 @@ func TestGophKeeperServer_Sync(t *testing.T) {
 
 		mockUser := mocks.NewMockuserService(ctrl)
 		mockSync := mocks.NewMocksyncService(ctrl)
-		handler := NewGophKeeperServer(mockUser, mockSync, testTimeout)
+		mockAuth := mocks.NewMockauthProvider(ctrl)
+		handler := NewGophKeeperServer(mockUser, mockSync, mockAuth, testTimeout)
 
 		req := &pb.SyncRequest{
 			Items: []*pb.Item{{Id: "item1"}},

@@ -42,7 +42,8 @@ func TestGophKeeperServer_Register(t *testing.T) {
 
 		mockUser := mocks.NewMockuserService(ctrl)
 		mockSync := mocks.NewMocksyncService(ctrl)
-		handler := NewGophKeeperServer(mockUser, mockSync, testTimeout)
+		mockAuth := mocks.NewMockauthProvider(ctrl)
+		handler := NewGophKeeperServer(mockUser, mockSync, mockAuth, testTimeout)
 
 		expectedUser := &models.User{
 			ID:   models.UserID(testUserID),
@@ -72,7 +73,8 @@ func TestGophKeeperServer_Register(t *testing.T) {
 
 		mockUser := mocks.NewMockuserService(ctrl)
 		mockSync := mocks.NewMocksyncService(ctrl)
-		handler := NewGophKeeperServer(mockUser, mockSync, testTimeout)
+		mockAuth := mocks.NewMockauthProvider(ctrl)
+		handler := NewGophKeeperServer(mockUser, mockSync, mockAuth, testTimeout)
 
 		testErr := errors.New("test error")
 		mockUser.EXPECT().
@@ -104,7 +106,8 @@ func TestGophKeeperServer_Login(t *testing.T) {
 
 		mockUser := mocks.NewMockuserService(ctrl)
 		mockSync := mocks.NewMocksyncService(ctrl)
-		handler := NewGophKeeperServer(mockUser, mockSync, testTimeout)
+		mockAuth := mocks.NewMockauthProvider(ctrl)
+		handler := NewGophKeeperServer(mockUser, mockSync, mockAuth, testTimeout)
 
 		expectedUser := &models.User{
 			ID:   models.UserID(testUserID),
@@ -134,7 +137,8 @@ func TestGophKeeperServer_Login(t *testing.T) {
 
 		mockUser := mocks.NewMockuserService(ctrl)
 		mockSync := mocks.NewMocksyncService(ctrl)
-		handler := NewGophKeeperServer(mockUser, mockSync, testTimeout)
+		mockAuth := mocks.NewMockauthProvider(ctrl)
+		handler := NewGophKeeperServer(mockUser, mockSync, mockAuth, testTimeout)
 
 		testErr := errors.New("test error")
 		mockUser.EXPECT().
@@ -155,12 +159,52 @@ func TestGophKeeperServer_AuthFuncOverride(t *testing.T) {
 
 	mockUser := mocks.NewMockuserService(ctrl)
 	mockSync := mocks.NewMocksyncService(ctrl)
-	handler := NewGophKeeperServer(mockUser, mockSync, testTimeout)
+	mockAuth := mocks.NewMockauthProvider(ctrl)
+	server := NewGophKeeperServer(mockUser, mockSync, mockAuth, testTimeout)
 
-	t.Run("always returns original context and nil error", func(t *testing.T) {
+	t.Run("should bypass auth for Register method", func(t *testing.T) {
 		ctx := context.Background()
-		newCtx, err := handler.AuthFuncOverride(ctx, "test/method")
+		fullMethodName := "/gophkeeper.GophKeeper/Register"
+
+		resultCtx, err := server.AuthFuncOverride(ctx, fullMethodName)
+
 		assert.NoError(t, err)
-		assert.Equal(t, ctx, newCtx)
+		assert.Equal(t, ctx, resultCtx)
+	})
+
+	t.Run("should bypass auth for Login method", func(t *testing.T) {
+		ctx := context.Background()
+		fullMethodName := "/gophkeeper.GophKeeper/Login"
+
+		resultCtx, err := server.AuthFuncOverride(ctx, fullMethodName)
+
+		assert.NoError(t, err)
+		assert.Equal(t, ctx, resultCtx)
+	})
+
+	t.Run("should handle case-insensitive method names", func(t *testing.T) {
+		testCases := []struct {
+			name       string
+			method     string
+			shouldAuth bool
+		}{
+			{"other method", "/service/Other", true},
+		}
+
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				ctx := context.Background()
+
+				if tc.shouldAuth {
+					mockAuth.EXPECT().
+						AuthFunc(ctx).
+						Return(ctx, nil)
+				}
+
+				_, err := server.AuthFuncOverride(ctx, tc.method)
+
+				assert.NoError(t, err)
+			})
+		}
 	})
 }
