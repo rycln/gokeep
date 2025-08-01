@@ -1,8 +1,8 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE items (
-    id VARCHAR(36) PRIMARY KEY,
-    user_id VARCHAR(36) NOT NULL REFERENCES users(id),
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES users(id),
     type VARCHAR(20) NOT NULL,
     name TEXT NOT NULL,
     metadata TEXT,
