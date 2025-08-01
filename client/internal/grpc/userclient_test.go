@@ -21,7 +21,7 @@ const (
 )
 
 type mockUserServiceClient struct {
-	gophkeeper.UserServiceClient
+	gophkeeper.GophKeeperClient
 	registerFunc func(ctx context.Context, in *gophkeeper.RegisterRequest, opts ...grpc.CallOption) (*gophkeeper.AuthResponse, error)
 	loginFunc    func(ctx context.Context, in *gophkeeper.LoginRequest, opts ...grpc.CallOption) (*gophkeeper.AuthResponse, error)
 }
@@ -66,7 +66,7 @@ func TestAuthClient_Register(t *testing.T) {
 			},
 		}
 
-		authClient := &AuthClient{client: mockClient}
+		authClient := &GophKeeperClient{client: mockClient}
 		user, err := authClient.Register(ctx, testReq)
 
 		require.NoError(t, err)
@@ -83,7 +83,7 @@ func TestAuthClient_Register(t *testing.T) {
 			},
 		}
 
-		authClient := &AuthClient{client: mockClient}
+		authClient := &GophKeeperClient{client: mockClient}
 		_, err := authClient.Register(ctx, testReq)
 
 		assert.Error(t, err)
@@ -111,7 +111,7 @@ func TestAuthClient_Login(t *testing.T) {
 			},
 		}
 
-		authClient := &AuthClient{client: mockClient}
+		authClient := &GophKeeperClient{client: mockClient}
 		user, err := authClient.Login(ctx, testReq)
 
 		require.NoError(t, err)
@@ -128,7 +128,7 @@ func TestAuthClient_Login(t *testing.T) {
 			},
 		}
 
-		authClient := &AuthClient{client: mockClient}
+		authClient := &GophKeeperClient{client: mockClient}
 		_, err := authClient.Login(ctx, testReq)
 
 		assert.Error(t, err)

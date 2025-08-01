@@ -9,19 +9,19 @@ import (
 )
 
 // AuthClient handles authentication operations via gRPC
-type AuthClient struct {
-	client pb.UserServiceClient // gRPC generated client interface
+type GophKeeperClient struct {
+	client pb.GophKeeperClient // gRPC generated client interface
 }
 
 // NewUserClient creates new AuthClient instance
-func NewUserClient(conn *grpc.ClientConn) *AuthClient {
-	return &AuthClient{
-		client: pb.NewUserServiceClient(conn),
+func NewUserClient(conn *grpc.ClientConn) *GophKeeperClient {
+	return &GophKeeperClient{
+		client: pb.NewGophKeeperClient(conn),
 	}
 }
 
 // Register performs user registration via gRPC
-func (c *AuthClient) Register(ctx context.Context, req *models.UserRegReq) (*models.User, error) {
+func (c *GophKeeperClient) Register(ctx context.Context, req *models.UserRegReq) (*models.User, error) {
 	res, err := c.client.Register(ctx, &pb.RegisterRequest{
 		Username: req.Username,
 		Password: req.Password,
@@ -40,7 +40,7 @@ func (c *AuthClient) Register(ctx context.Context, req *models.UserRegReq) (*mod
 }
 
 // Login performs user authentication via gRPC
-func (c *AuthClient) Login(ctx context.Context, req *models.UserLoginReq) (*models.User, error) {
+func (c *GophKeeperClient) Login(ctx context.Context, req *models.UserLoginReq) (*models.User, error) {
 	res, err := c.client.Login(ctx, &pb.LoginRequest{
 		Username: req.Username,
 		Password: req.Password,
