@@ -17,7 +17,7 @@ const sqlGetUserByUsername = `
 
 const sqlDeleteItem = `
 	UPDATE items 
-	SET deleted = true, 
+	SET is_deleted = true, 
 		updated_at = $1 
 	WHERE id = $2 AND user_id = $3
 `
