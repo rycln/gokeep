@@ -91,15 +91,17 @@ func New() (*App, error) {
 		MinVersion:   tls.VersionTLS12,
 	}
 
+	authInterceptor := interceptors.NewAuthInterceptor(jwtservice)
+
 	g := grpc.NewServer(
 		grpc.Creds(credentials.NewTLS(tlsConfig)),
 		grpc.ChainUnaryInterceptor(
 			logging.UnaryServerInterceptor(interceptors.InterceptorLogger(logger.Log)),
-			auth.UnaryServerInterceptor(interceptors.NewAuthInterceptor(jwtservice).AuthFunc),
+			auth.UnaryServerInterceptor(authInterceptor.AuthFunc),
 		),
 	)
 
-	gs := server.NewGophKeeperServer(authservice, syncservice, cfg.Timeout)
+	gs := server.NewGophKeeperServer(authservice, syncservice, authInterceptor, cfg.Timeout)
 
 	pb.RegisterGophKeeperServer(g, gs)
 
