@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/rycln/gokeep/shared/models"
@@ -21,7 +22,7 @@ func NewItemStorage(db *sql.DB) *ItemStorage {
 
 // DeleteItem removes an item from storage by ID and user ID.
 func (s *ItemStorage) DeleteItem(ctx context.Context, id models.ItemID, uid models.UserID) error {
-	_, err := s.db.ExecContext(ctx, sqlDeleteItem, id, uid)
+	_, err := s.db.ExecContext(ctx, sqlDeleteItem, time.Now(), id, uid)
 	if err != nil {
 		return err
 	}
