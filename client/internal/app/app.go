@@ -76,14 +76,15 @@ func New() (*App, error) {
 
 	itemStorage := storage.NewItemStorage(db)
 
-	authService := services.NewAuthService(client.NewUserClient(conn))
+	authService := services.NewAuthService(client.NewGophKeeperClient(conn))
 
 	crypt := crypto.NewAESCrypter()
 	itemService := services.NewItemService(itemStorage, crypt)
+	syncService := services.NewSyncService(client.NewGophKeeperClient(conn), itemStorage)
 	keyService := services.NewKeyService()
 
 	authScreen := auth.InitialModel(authService, keyService, crypt, timeout)
-	vaultScreen := vault.InitialModel(itemService, timeout)
+	vaultScreen := vault.InitialModel(itemService, syncService, timeout)
 	addScreen := add.InitialModel(itemService, timeout)
 	updateScreen := update.InitialModel(itemService, timeout)
 
