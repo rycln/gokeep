@@ -8,20 +8,21 @@ const sqlCreateItemsTable = `
 		name TEXT NOT NULL,
 		encrypt_content BLOB NOT NULL,
 		metadata TEXT,
-		updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+		updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		is_deleted BOOLEAN DEFAULT FALSE
 	)
 `
 const sqlAddItem = `
 	INSERT INTO items
-	(id, user_id, type, name, encrypt_content, metadata) 
-	VALUES ($1, $2, $3, $4, $5, $6)
+	(id, user_id, type, name, encrypt_content, metadata, is_deleted) 
+	VALUES ($1, $2, $3, $4, $5, $6, false)
 `
 
 const sqlGetItemByID = `
 	SELECT 
 		encrypt_content
 	FROM items
-	WHERE id = $1
+	WHERE id = $1 AND is_deleted = FALSE
 `
 
 const sqlGetUserItemsInfo = `
@@ -33,11 +34,12 @@ const sqlGetUserItemsInfo = `
 		metadata,
 		updated_at 
 	FROM items
-	WHERE user_id = $1
+	WHERE user_id = $1 AND is_deleted = FALSE
 `
 
 const sqlDeleteItem = `
-	DELETE FROM items
+	UPDATE items
+	SET is_deleted = TRUE
 	WHERE id = $1
 `
 
