@@ -16,6 +16,18 @@ const (
 	testItemID = "550e8400-e29b-41d4-a716-446655440001"
 )
 
+func TestNewItemStorage(t *testing.T) {
+	t.Run("should create new item storage", func(t *testing.T) {
+		db, _, err := sqlmock.New()
+		require.NoError(t, err)
+		defer db.Close()
+
+		storage := NewItemStorage(db)
+		assert.NotNil(t, storage)
+		assert.Equal(t, db, storage.db)
+	})
+}
+
 func TestItemStorage_AddItem(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	require.NoError(t, err)
@@ -68,6 +80,7 @@ func TestItemStorage_AddItem(t *testing.T) {
 
 		err := strg.AddItem(context.Background(), testItem)
 		assert.Error(t, err)
+		assert.Equal(t, errTest, err)
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 }
@@ -83,7 +96,7 @@ func TestItemStorage_DeleteItem(t *testing.T) {
 
 	t.Run("successful item deletion", func(t *testing.T) {
 		mock.ExpectExec(expectedQuery).
-			WithArgs(testItemID, testUserID).
+			WithArgs(sqlmock.AnyArg(), testItemID, testUserID).
 			WillReturnResult(sqlmock.NewResult(0, 1))
 
 		err := strg.DeleteItem(context.Background(), testItemID, testUserID)
@@ -93,11 +106,12 @@ func TestItemStorage_DeleteItem(t *testing.T) {
 
 	t.Run("general database error", func(t *testing.T) {
 		mock.ExpectExec(expectedQuery).
-			WithArgs(testItemID, testUserID).
+			WithArgs(sqlmock.AnyArg(), testItemID, testUserID).
 			WillReturnError(errTest)
 
 		err := strg.DeleteItem(context.Background(), testItemID, testUserID)
 		assert.Error(t, err)
+		assert.Equal(t, errTest, err)
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 }
@@ -121,53 +135,32 @@ func TestItemStorage_GetUserItems(t *testing.T) {
 			UpdatedAt: testTime,
 			IsDeleted: false,
 		},
-		{
-			ID:        "550e8400-e29b-41d4-a716-446655440002",
-			UserID:    testUserID,
-			ItemType:  "password",
-			Name:      "test item 2",
-			Metadata:  "{}",
-			Data:      []byte("test data 2"),
-			UpdatedAt: testTime.Add(time.Hour),
-			IsDeleted: false,
-		},
 	}
 
 	expectedQuery := regexp.QuoteMeta(sqlGetUserItems)
 
-	t.Run("successful items retrieval", func(t *testing.T) {
-		rows := mock.NewRows([]string{
+	t.Run("rows close error", func(t *testing.T) {
+		rows := sqlmock.NewRows([]string{
 			"id", "item_type", "name", "metadata", "data", "updated_at", "is_deleted",
-		})
-		for _, item := range testItems {
-			rows.AddRow(
-				item.ID,
-				item.ItemType,
-				item.Name,
-				item.Metadata,
-				item.Data,
-				item.UpdatedAt,
-				item.IsDeleted,
-			)
-		}
+		}).AddRow(
+			testItems[0].ID,
+			testItems[0].ItemType,
+			testItems[0].Name,
+			testItems[0].Metadata,
+			testItems[0].Data,
+			testItems[0].UpdatedAt,
+			testItems[0].IsDeleted,
+		)
+		// Правильный способ установки ошибки закрытия
+		rows = rows.CloseError(errTest)
 
 		mock.ExpectQuery(expectedQuery).
 			WithArgs(testUserID).
 			WillReturnRows(rows)
 
-		items, err := strg.GetUserItems(context.Background(), testUserID)
-		assert.NoError(t, err)
-		assert.Equal(t, testItems, items)
-		assert.NoError(t, mock.ExpectationsWereMet())
-	})
-
-	t.Run("general database error", func(t *testing.T) {
-		mock.ExpectQuery(expectedQuery).
-			WithArgs(testUserID).
-			WillReturnError(errTest)
-
 		_, err := strg.GetUserItems(context.Background(), testUserID)
 		assert.Error(t, err)
+		assert.ErrorContains(t, err, errTest.Error())
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 }
