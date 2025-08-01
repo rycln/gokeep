@@ -19,10 +19,23 @@ const (
 // ItemInfo contains metadata about a stored item.
 // Represents common fields across all item types.
 type ItemInfo struct {
-	ID        ItemID
-	UserID    UserID
-	ItemType  ItemType
-	Name      string
-	Metadata  string
-	UpdatedAt time.Time
+	ID        ItemID    // Unique item identifier
+	UserID    UserID    // ID of the user who owns the item
+	ItemType  ItemType  // Type of the item (password, card, etc.)
+	Name      string    // Human-readable name of the item
+	Metadata  string    // Additional metadata in string format
+	UpdatedAt time.Time // Last modification timestamp
+}
+
+// Item represents a complete stored item with all data fields.
+// Used for full item operations including synchronization.
+type Item struct {
+	ID        ItemID    // Unique item identifier
+	UserID    UserID    // ID of the user who owns the item
+	ItemType  ItemType  // Type of the item (password, card, etc.)
+	Name      string    // Human-readable name of the item
+	Metadata  string    // Additional metadata in string format
+	Data      []byte    // Encrypted item data
+	UpdatedAt time.Time // Last modification timestamp
+	IsDeleted bool      // Soft delete flag
 }
