@@ -51,3 +51,35 @@ const sqlUpdateItem = `
 		encrypt_content = $4
 	WHERE user_id = $5 AND id = $6 
 `
+
+const sqlGetAllUserItems = `
+	SELECT 
+		id,
+		user_id,
+		type,
+		name, 
+		metadata,
+		encrypt_content,
+		updated_at, 
+		is_deleted 
+	FROM items
+	WHERE user_id = $1
+`
+
+const sqlDeleteUserItems = `
+	DELETE FROM items
+	WHERE user_id = $1
+`
+
+const sqlAddUserItems = `
+	INSERT INTO items (
+		id, 
+		user_id, 
+		type, 
+		name, 
+		metadata, 
+		encrypt_content, 
+		updated_at, 
+		is_deleted
+	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+`

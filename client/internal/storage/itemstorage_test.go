@@ -352,3 +352,344 @@ func TestItemStorage_UpdateItem(t *testing.T) {
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 }
+
+func TestItemStorage_GetAllUserItems(t *testing.T) {
+	ctx := context.Background()
+	userID := models.UserID("user123")
+
+	expectedQuery := regexp.QuoteMeta(sqlGetAllUserItems)
+
+	t.Run("successful get all items", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		require.NoError(t, err)
+		defer db.Close()
+
+		storage := NewItemStorage(db)
+
+		expectedItems := []models.Item{
+			{
+				ID:        "item1",
+				UserID:    userID,
+				ItemType:  models.TypePassword,
+				Name:      "item 1",
+				Metadata:  "metadata1",
+				Data:      []byte("data1"),
+				UpdatedAt: time.Now(),
+				IsDeleted: false,
+			},
+			{
+				ID:        "item2",
+				UserID:    userID,
+				ItemType:  models.TypeCard,
+				Name:      "item 2",
+				Metadata:  "metadata2",
+				Data:      []byte("data2"),
+				UpdatedAt: time.Now(),
+				IsDeleted: true,
+			},
+		}
+
+		rows := sqlmock.NewRows([]string{
+			"id", "user_id", "type", "name", "metadata", "content", "updated_at", "is_deleted",
+		}).
+			AddRow(
+				expectedItems[0].ID,
+				expectedItems[0].UserID,
+				expectedItems[0].ItemType,
+				expectedItems[0].Name,
+				expectedItems[0].Metadata,
+				expectedItems[0].Data,
+				expectedItems[0].UpdatedAt,
+				expectedItems[0].IsDeleted,
+			).
+			AddRow(
+				expectedItems[1].ID,
+				expectedItems[1].UserID,
+				expectedItems[1].ItemType,
+				expectedItems[1].Name,
+				expectedItems[1].Metadata,
+				expectedItems[1].Data,
+				expectedItems[1].UpdatedAt,
+				expectedItems[1].IsDeleted,
+			)
+
+		mock.ExpectQuery(expectedQuery).
+			WithArgs(userID).
+			WillReturnRows(rows)
+
+		items, err := storage.GetAllUserItems(ctx, userID)
+		require.NoError(t, err)
+		assert.Equal(t, expectedItems, items)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+
+	t.Run("database error", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		require.NoError(t, err)
+		defer db.Close()
+
+		storage := NewItemStorage(db)
+
+		expectedErr := errors.New("database error")
+		mock.ExpectQuery(expectedQuery).
+			WithArgs(userID).
+			WillReturnError(expectedErr)
+
+		_, err = storage.GetAllUserItems(ctx, userID)
+		assert.Error(t, err)
+		assert.Equal(t, expectedErr, err)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+
+	t.Run("scan error", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		require.NoError(t, err)
+		defer db.Close()
+
+		storage := NewItemStorage(db)
+
+		rows := sqlmock.NewRows([]string{
+			"id", "user_id", "type", "name", "metadata", "content", "updated_at", "is_deleted",
+		}).
+			AddRow("item1", "user123", "invalid_type", "item 1", "{}", []byte("data"), time.Now(), "invalid_bool")
+
+		mock.ExpectQuery(expectedQuery).
+			WithArgs(userID).
+			WillReturnRows(rows)
+
+		_, err = storage.GetAllUserItems(ctx, userID)
+		assert.Error(t, err)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+}
+
+func TestItemStorage_ReplaceAllUserItems(t *testing.T) {
+	ctx := context.Background()
+	userID := models.UserID("user123")
+
+	items := []models.Item{
+		{
+			ID:        "item1",
+			UserID:    userID,
+			ItemType:  models.TypePassword,
+			Name:      "item 1",
+			Metadata:  "metadata1",
+			Data:      []byte("data1"),
+			UpdatedAt: time.Now(),
+			IsDeleted: false,
+		},
+		{
+			ID:        "item2",
+			UserID:    userID,
+			ItemType:  models.TypeCard,
+			Name:      "item 2",
+			Metadata:  "metadata2",
+			Data:      []byte("data2"),
+			UpdatedAt: time.Now(),
+			IsDeleted: true,
+		},
+	}
+
+	t.Run("successful replace", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		require.NoError(t, err)
+		defer db.Close()
+
+		storage := NewItemStorage(db)
+
+		// Begin transaction
+		mock.ExpectBegin()
+
+		// Delete all items
+		mock.ExpectExec(regexp.QuoteMeta(sqlDeleteUserItems)).
+			WithArgs(userID).
+			WillReturnResult(sqlmock.NewResult(0, 2))
+
+		// Prepare statement
+		mock.ExpectPrepare(regexp.QuoteMeta(sqlAddUserItems))
+
+		// Insert items
+		for _, item := range items {
+			mock.ExpectExec(regexp.QuoteMeta(sqlAddUserItems)).
+				WithArgs(
+					item.ID,
+					item.UserID,
+					item.ItemType,
+					item.Name,
+					item.Metadata,
+					item.Data,
+					item.UpdatedAt,
+					item.IsDeleted,
+				).
+				WillReturnResult(sqlmock.NewResult(1, 1))
+		}
+
+		// Commit transaction
+		mock.ExpectCommit()
+
+		err = storage.ReplaceAllUserItems(ctx, userID, items)
+		assert.NoError(t, err)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+
+	t.Run("begin transaction error", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		require.NoError(t, err)
+		defer db.Close()
+
+		storage := NewItemStorage(db)
+
+		expectedErr := errors.New("begin error")
+		mock.ExpectBegin().WillReturnError(expectedErr)
+
+		err = storage.ReplaceAllUserItems(ctx, userID, items)
+		assert.Error(t, err)
+		assert.Equal(t, expectedErr, err)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+
+	t.Run("delete items error", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		require.NoError(t, err)
+		defer db.Close()
+
+		storage := NewItemStorage(db)
+
+		// Begin transaction
+		mock.ExpectBegin()
+
+		// Delete all items error
+		expectedErr := errors.New("delete error")
+		mock.ExpectExec(regexp.QuoteMeta(sqlDeleteUserItems)).
+			WithArgs(userID).
+			WillReturnError(expectedErr)
+
+		err = storage.ReplaceAllUserItems(ctx, userID, items)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "failed to clear items table")
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+
+	t.Run("prepare statement error", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		require.NoError(t, err)
+		defer db.Close()
+
+		storage := NewItemStorage(db)
+
+		// Begin transaction
+		mock.ExpectBegin()
+
+		// Delete all items
+		mock.ExpectExec(regexp.QuoteMeta(sqlDeleteUserItems)).
+			WithArgs(userID).
+			WillReturnResult(sqlmock.NewResult(0, 2))
+
+		// Prepare statement error
+		expectedErr := errors.New("prepare error")
+		mock.ExpectPrepare(regexp.QuoteMeta(sqlAddUserItems)).
+			WillReturnError(expectedErr)
+
+		err = storage.ReplaceAllUserItems(ctx, userID, items)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "failed to prepare insert statement")
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+
+	t.Run("insert item error", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		require.NoError(t, err)
+		defer db.Close()
+
+		storage := NewItemStorage(db)
+
+		// Begin transaction
+		mock.ExpectBegin()
+
+		// Delete all items
+		mock.ExpectExec(regexp.QuoteMeta(sqlDeleteUserItems)).
+			WithArgs(userID).
+			WillReturnResult(sqlmock.NewResult(0, 2))
+
+		// Prepare statement
+		mock.ExpectPrepare(regexp.QuoteMeta(sqlAddUserItems))
+
+		// First insert succeeds
+		mock.ExpectExec(regexp.QuoteMeta(sqlAddUserItems)).
+			WithArgs(
+				items[0].ID,
+				items[0].UserID,
+				items[0].ItemType,
+				items[0].Name,
+				items[0].Metadata,
+				items[0].Data,
+				items[0].UpdatedAt,
+				items[0].IsDeleted,
+			).
+			WillReturnResult(sqlmock.NewResult(1, 1))
+
+		// Second insert fails
+		expectedErr := errors.New("insert error")
+		mock.ExpectExec(regexp.QuoteMeta(sqlAddUserItems)).
+			WithArgs(
+				items[1].ID,
+				items[1].UserID,
+				items[1].ItemType,
+				items[1].Name,
+				items[1].Metadata,
+				items[1].Data,
+				items[1].UpdatedAt,
+				items[1].IsDeleted,
+			).
+			WillReturnError(expectedErr)
+
+		err = storage.ReplaceAllUserItems(ctx, userID, items)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "failed to insert item")
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+
+	t.Run("commit error", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		require.NoError(t, err)
+		defer db.Close()
+
+		storage := NewItemStorage(db)
+
+		// Begin transaction
+		mock.ExpectBegin()
+
+		// Delete all items
+		mock.ExpectExec(regexp.QuoteMeta(sqlDeleteUserItems)).
+			WithArgs(userID).
+			WillReturnResult(sqlmock.NewResult(0, 2))
+
+		// Prepare statement
+		mock.ExpectPrepare(regexp.QuoteMeta(sqlAddUserItems))
+
+		// Insert items
+		for _, item := range items {
+			mock.ExpectExec(regexp.QuoteMeta(sqlAddUserItems)).
+				WithArgs(
+					item.ID,
+					item.UserID,
+					item.ItemType,
+					item.Name,
+					item.Metadata,
+					item.Data,
+					item.UpdatedAt,
+					item.IsDeleted,
+				).
+				WillReturnResult(sqlmock.NewResult(1, 1))
+		}
+
+		// Commit error
+		expectedErr := errors.New("commit error")
+		mock.ExpectCommit().WillReturnError(expectedErr)
+
+		err = storage.ReplaceAllUserItems(ctx, userID, items)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "failed to commit transaction")
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+}

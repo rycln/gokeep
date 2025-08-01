@@ -3,6 +3,8 @@ package storage
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
 
 	"github.com/rycln/gokeep/shared/models"
 )
@@ -85,4 +87,82 @@ func (s *ItemStorage) UpdateItem(ctx context.Context, info *models.ItemInfo, con
 		info.ID,
 	)
 	return err
+}
+
+// GetAllUserItems retrieves all items (including content and deleted status) for a specific user
+func (s *ItemStorage) GetAllUserItems(ctx context.Context, uid models.UserID) ([]models.Item, error) {
+	rows, err := s.db.QueryContext(ctx, sqlGetAllUserItems, uid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var items []models.Item
+	for rows.Next() {
+		var item models.Item
+		if err := rows.Scan(
+			&item.ID,
+			&item.UserID,
+			&item.ItemType,
+			&item.Name,
+			&item.Metadata,
+			&item.Data,
+			&item.UpdatedAt,
+			&item.IsDeleted,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, item)
+	}
+
+	return items, rows.Err()
+}
+
+// ReplaceAllUserItems completely replaces all items for a user in a single transaction
+// First deletes all existing items, then inserts the new ones
+func (s *ItemStorage) ReplaceAllUserItems(ctx context.Context, uid models.UserID, items []models.Item) (err error) {
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil && !errors.Is(rollbackErr, sql.ErrTxDone) {
+			err = fmt.Errorf("%v; rollback failed: %w", err, rollbackErr)
+		}
+	}()
+
+	if _, err := tx.Exec(sqlDeleteUserItems, uid); err != nil {
+		tx.Rollback()
+		return fmt.Errorf("failed to clear items table: %w", err)
+	}
+
+	stmt, err := tx.Prepare(sqlAddUserItems)
+	if err != nil {
+		tx.Rollback()
+		return fmt.Errorf("failed to prepare insert statement: %w", err)
+	}
+	defer stmt.Close()
+
+	for _, item := range items {
+		_, err := stmt.Exec(
+			item.ID,
+			item.UserID,
+			item.ItemType,
+			item.Name,
+			item.Metadata,
+			item.Data,
+			item.UpdatedAt,
+			item.IsDeleted,
+		)
+		if err != nil {
+			tx.Rollback()
+			return fmt.Errorf("failed to insert item %s: %w", item.ID, err)
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return nil
 }
