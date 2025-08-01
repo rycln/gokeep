@@ -73,10 +73,12 @@ func New() (*App, error) {
 	}
 
 	authstrg := storage.NewUserStorage(db)
+	itemstrg := storage.NewItemStorage(db)
 
 	passwordStrategy := password.NewBCryptHasher()
 	jwtservice := services.NewJWTService(cfg.Key, jwtExpires)
 	authservice := services.NewUserService(authstrg, passwordStrategy, jwtservice)
+	syncservice := services.NewSyncService(itemstrg, authservice)
 
 	serverCert, err := tls.LoadX509KeyPair(cfg.CertFileName, cfg.CertKeyFileName)
 	if err != nil {
@@ -97,9 +99,9 @@ func New() (*App, error) {
 		),
 	)
 
-	gs := server.NewGophKeeperServer(authservice, cfg.Timeout)
+	gs := server.NewGophKeeperServer(authservice, syncservice, cfg.Timeout)
 
-	pb.RegisterUserServiceServer(g, gs)
+	pb.RegisterGophKeeperServer(g, gs)
 
 	return &App{
 		grpcserver: g,
