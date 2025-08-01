@@ -67,6 +67,9 @@ func handleListState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 			case "u", "г":
 				m.state = ProcessingState
 				return m, m.loadItems()
+			case "s", "ы":
+				m.state = ProcessingState
+				return m, m.syncItems()
 			case "n", "т":
 				return m, func() tea.Msg { return AddItemReqMsg{User: m.user} }
 			}
@@ -84,7 +87,7 @@ func (m Model) loadItems() tea.Cmd {
 		ctx, cancel := context.WithTimeout(context.Background(), m.timeout)
 		defer cancel()
 
-		items, err := m.service.List(ctx, m.user.ID)
+		items, err := m.itemService.List(ctx, m.user.ID)
 		if err != nil {
 			return ErrorMsg{Err: err}
 		}
@@ -101,6 +104,21 @@ func (m Model) loadItems() tea.Cmd {
 		}
 
 		return ItemsMsg{Items: ritems}
+	}
+}
+
+// syncItems manages sync operations
+func (m Model) syncItems() tea.Cmd {
+	return func() tea.Msg {
+		ctx, cancel := context.WithTimeout(context.Background(), m.timeout)
+		defer cancel()
+
+		err := m.syncService.SyncUserItems(ctx, m.user)
+		if err != nil {
+			return ErrorMsg{Err: err}
+		}
+
+		return SyncSuccessMsg{}
 	}
 }
 
@@ -139,7 +157,7 @@ func (m Model) getContent() tea.Cmd {
 		ctx, cancel := context.WithTimeout(context.Background(), m.timeout)
 		defer cancel()
 
-		contentBytes, err := m.service.GetContent(ctx, m.selected.ID)
+		contentBytes, err := m.itemService.GetContent(ctx, m.selected.ID)
 		if err != nil {
 			return ErrorMsg{Err: err}
 		}
@@ -169,7 +187,7 @@ func (m Model) deleteItem() tea.Cmd {
 		ctx, cancel := context.WithTimeout(context.Background(), m.timeout)
 		defer cancel()
 
-		err := m.service.Delete(ctx, m.selected.ID)
+		err := m.itemService.Delete(ctx, m.selected.ID)
 		if err != nil {
 			return ErrorMsg{Err: err}
 		}
@@ -184,7 +202,7 @@ func (m Model) updateItem() tea.Cmd {
 		ctx, cancel := context.WithTimeout(context.Background(), m.timeout)
 		defer cancel()
 
-		contentBytes, err := m.service.GetContent(ctx, m.selected.ID)
+		contentBytes, err := m.itemService.GetContent(ctx, m.selected.ID)
 		if err != nil {
 			return ErrorMsg{Err: err}
 		}
@@ -222,6 +240,8 @@ func handleProcessingState(m Model, msg tea.Msg) (Model, tea.Cmd) {
 		m.selected.Content = msg.Content
 		m.state = DetailState
 	case DeleteSuccessMsg:
+		m.state = UpdateState
+	case SyncSuccessMsg:
 		m.state = UpdateState
 	}
 

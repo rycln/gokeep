@@ -168,3 +168,40 @@ func (mr *MockitemServiceMockRecorder) List(arg0, arg1 interface{}) *gomock.Call
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockitemService)(nil).List), arg0, arg1)
 }
+
+// MocksyncService is a mock of syncService interface.
+type MocksyncService struct {
+	ctrl     *gomock.Controller
+	recorder *MocksyncServiceMockRecorder
+}
+
+// MocksyncServiceMockRecorder is the mock recorder for MocksyncService.
+type MocksyncServiceMockRecorder struct {
+	mock *MocksyncService
+}
+
+// NewMocksyncService creates a new mock instance.
+func NewMocksyncService(ctrl *gomock.Controller) *MocksyncService {
+	mock := &MocksyncService{ctrl: ctrl}
+	mock.recorder = &MocksyncServiceMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MocksyncService) EXPECT() *MocksyncServiceMockRecorder {
+	return m.recorder
+}
+
+// SyncUserItems mocks base method.
+func (m *MocksyncService) SyncUserItems(arg0 context.Context, arg1 *models.User) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SyncUserItems", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SyncUserItems indicates an expected call of SyncUserItems.
+func (mr *MocksyncServiceMockRecorder) SyncUserItems(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SyncUserItems", reflect.TypeOf((*MocksyncService)(nil).SyncUserItems), arg0, arg1)
+}

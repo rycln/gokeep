@@ -44,6 +44,9 @@ type (
 	// DeleteSuccessMsg confirms successful item deletion
 	DeleteSuccessMsg struct{}
 
+	// SyncSuccessMsg confirms successful item sync
+	SyncSuccessMsg struct{}
+
 	// ItemsMsg delivers list of items for display
 	ItemsMsg struct{ Items []itemRender }
 
@@ -71,6 +74,11 @@ type itemService interface {
 	itemDeleter
 }
 
+// syncService defines interface for sync operation
+type syncService interface {
+	SyncUserItems(context.Context, *models.User) error
+}
+
 // itemRender represents formatted item for display
 type itemRender struct {
 	ID        models.ItemID   // Unique item identifier
@@ -94,19 +102,20 @@ func (i itemRender) Description() string {
 
 // Model represents vault screen state and components
 type Model struct {
-	state    state         // Current view state
-	input    string        // User input buffer
-	selected *itemRender   // Currently selected item
-	items    []itemRender  // List of all items
-	list     list.Model    // List UI component
-	errMsg   string        // Last error message
-	service  itemService   // Item service interface
-	user     *models.User  // Current authenticated user
-	timeout  time.Duration // UI message timeout
+	state       state        // Current view state
+	input       string       // User input buffer
+	selected    *itemRender  // Currently selected item
+	items       []itemRender // List of all items
+	list        list.Model   // List UI component
+	errMsg      string       // Last error message
+	itemService itemService  // Item service interface
+	syncService syncService
+	user        *models.User  // Current authenticated user
+	timeout     time.Duration // UI message timeout
 }
 
 // InitialModel creates new vault model with dependencies
-func InitialModel(service itemService, timeout time.Duration) Model {
+func InitialModel(itemService itemService, syncService syncService, timeout time.Duration) Model {
 	delegate := list.NewDefaultDelegate()
 	delegate.Styles.SelectedTitle = delegate.Styles.SelectedTitle.
 		Border(lipgloss.ThickBorder(), false, false, false, true).
@@ -124,6 +133,10 @@ func InitialModel(service itemService, timeout time.Duration) Model {
 				key.WithKeys("u"),
 				key.WithHelp("u", i18n.VaultUpdateHelp),
 			),
+			key.NewBinding(
+				key.WithKeys("s"),
+				key.WithHelp("s", i18n.VaultSyncHelp),
+			),
 		}
 	}
 
@@ -136,10 +149,11 @@ func InitialModel(service itemService, timeout time.Duration) Model {
 	l.SetStatusBarItemName(i18n.VaultListTitleNameSingular, i18n.VaultListTitleNamePlural)
 
 	return Model{
-		state:   UpdateState,
-		list:    l,
-		service: service,
-		timeout: timeout,
+		state:       UpdateState,
+		list:        l,
+		itemService: itemService,
+		syncService: syncService,
+		timeout:     timeout,
 	}
 }
 

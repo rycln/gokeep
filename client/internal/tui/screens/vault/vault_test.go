@@ -18,14 +18,16 @@ func TestInitialModel(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockService := mocks.NewMockitemService(ctrl)
+		mockItemService := mocks.NewMockitemService(ctrl)
+		mockSyncService := mocks.NewMocksyncService(ctrl)
 		timeout := 5 * time.Second
 
-		model := InitialModel(mockService, timeout)
+		model := InitialModel(mockItemService, mockSyncService, timeout)
 
 		assert.Equal(t, UpdateState, model.state)
 		assert.NotNil(t, model.list)
-		assert.Equal(t, mockService, model.service)
+		assert.Equal(t, mockItemService, model.itemService)
+		assert.Equal(t, mockSyncService, model.syncService)
 		assert.Equal(t, timeout, model.timeout)
 	})
 }
@@ -35,8 +37,9 @@ func TestSetUser(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockService := mocks.NewMockitemService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		mockItemService := mocks.NewMockitemService(ctrl)
+		mockSyncService := mocks.NewMocksyncService(ctrl)
+		model := InitialModel(mockItemService, mockSyncService, time.Second)
 		user := &models.User{ID: "test-user"}
 
 		model.SetUser(user)
@@ -49,8 +52,9 @@ func TestSetUpdateState(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockService := mocks.NewMockitemService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		mockItemService := mocks.NewMockitemService(ctrl)
+		mockSyncService := mocks.NewMocksyncService(ctrl)
+		model := InitialModel(mockItemService, mockSyncService, time.Second)
 		model.state = ListState
 
 		model.SetUpdateState()
@@ -63,8 +67,9 @@ func TestInit(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockService := mocks.NewMockitemService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		mockItemService := mocks.NewMockitemService(ctrl)
+		mockSyncService := mocks.NewMocksyncService(ctrl)
+		model := InitialModel(mockItemService, mockSyncService, time.Second)
 
 		cmd := model.Init()
 		assert.NotNil(t, cmd)
@@ -79,8 +84,9 @@ func TestInit(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockService := mocks.NewMockitemService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		mockItemService := mocks.NewMockitemService(ctrl)
+		mockSyncService := mocks.NewMocksyncService(ctrl)
+		model := InitialModel(mockItemService, mockSyncService, time.Second)
 		model.SetUser(&models.User{ID: "test-user"})
 
 		cmd := model.Init()
@@ -93,8 +99,9 @@ func TestLoadItems(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockService := mocks.NewMockitemService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		mockItemService := mocks.NewMockitemService(ctrl)
+		mockSyncService := mocks.NewMocksyncService(ctrl)
+		model := InitialModel(mockItemService, mockSyncService, time.Second)
 		user := &models.User{ID: "test-user"}
 		model.SetUser(user)
 
@@ -103,7 +110,7 @@ func TestLoadItems(t *testing.T) {
 			{ID: "item2", Name: "Item 2"},
 		}
 
-		mockService.EXPECT().
+		mockItemService.EXPECT().
 			List(gomock.Any(), user.ID).
 			Return(expectedItems, nil)
 
@@ -118,17 +125,61 @@ func TestLoadItems(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockService := mocks.NewMockitemService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		mockItemService := mocks.NewMockitemService(ctrl)
+		mockSyncService := mocks.NewMocksyncService(ctrl)
+		model := InitialModel(mockItemService, mockSyncService, time.Second)
 		user := &models.User{ID: "test-user"}
 		model.SetUser(user)
 
 		testErr := errors.New("service error")
-		mockService.EXPECT().
+		mockItemService.EXPECT().
 			List(gomock.Any(), user.ID).
 			Return(nil, testErr)
 
 		cmd := model.loadItems()
+		msg := cmd().(ErrorMsg)
+
+		assert.Equal(t, testErr, msg.Err)
+	})
+}
+
+func TestSyncItems(t *testing.T) {
+	t.Run("should return SyncSuccessMsg on successful sync", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockItemService := mocks.NewMockitemService(ctrl)
+		mockSyncService := mocks.NewMocksyncService(ctrl)
+		model := InitialModel(mockItemService, mockSyncService, time.Second)
+		user := &models.User{ID: models.UserID("test-user")}
+		model.SetUser(user)
+
+		mockSyncService.EXPECT().
+			SyncUserItems(gomock.Any(), user).
+			Return(nil)
+
+		cmd := model.syncItems()
+		msg := cmd().(SyncSuccessMsg)
+
+		assert.NotNil(t, msg)
+	})
+
+	t.Run("should return ErrorMsg on sync error", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockItemService := mocks.NewMockitemService(ctrl)
+		mockSyncService := mocks.NewMocksyncService(ctrl)
+		model := InitialModel(mockItemService, mockSyncService, time.Second)
+		user := &models.User{ID: models.UserID("test-user")}
+		model.SetUser(user)
+
+		testErr := errors.New("sync error")
+		mockSyncService.EXPECT().
+			SyncUserItems(gomock.Any(), user).
+			Return(testErr)
+
+		cmd := model.syncItems()
 		msg := cmd().(ErrorMsg)
 
 		assert.Equal(t, testErr, msg.Err)
@@ -140,11 +191,12 @@ func TestDeleteItem(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockService := mocks.NewMockitemService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		mockItemService := mocks.NewMockitemService(ctrl)
+		mockSyncService := mocks.NewMocksyncService(ctrl)
+		model := InitialModel(mockItemService, mockSyncService, time.Second)
 		model.selected = &itemRender{ID: models.ItemID("test-id")}
 
-		mockService.EXPECT().
+		mockItemService.EXPECT().
 			Delete(gomock.Any(), models.ItemID("test-id")).
 			Return(nil)
 
@@ -160,8 +212,9 @@ func TestUpdate(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockService := mocks.NewMockitemService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		mockItemService := mocks.NewMockitemService(ctrl)
+		mockSyncService := mocks.NewMocksyncService(ctrl)
+		model := InitialModel(mockItemService, mockSyncService, time.Second)
 		model.state = UpdateState
 
 		newModel, cmd := model.Update(nil)
@@ -175,11 +228,26 @@ func TestHandleListState(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockService := mocks.NewMockitemService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		mockItemService := mocks.NewMockitemService(ctrl)
+		mockSyncService := mocks.NewMocksyncService(ctrl)
+		model := InitialModel(mockItemService, mockSyncService, time.Second)
 		model.state = ListState
 
 		newModel, cmd := handleListState(model, tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'u'}})
+		assert.Equal(t, ProcessingState, newModel.state)
+		assert.NotNil(t, cmd)
+	})
+
+	t.Run("should sync items on 's' key", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockItemService := mocks.NewMockitemService(ctrl)
+		mockSyncService := mocks.NewMocksyncService(ctrl)
+		model := InitialModel(mockItemService, mockSyncService, time.Second)
+		model.state = ListState
+
+		newModel, cmd := handleListState(model, tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'s'}})
 		assert.Equal(t, ProcessingState, newModel.state)
 		assert.NotNil(t, cmd)
 	})
@@ -190,8 +258,9 @@ func TestHandleDetailState(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockService := mocks.NewMockitemService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		mockItemService := mocks.NewMockitemService(ctrl)
+		mockSyncService := mocks.NewMocksyncService(ctrl)
+		model := InitialModel(mockItemService, mockSyncService, time.Second)
 		model.state = DetailState
 		model.selected = &itemRender{ID: "test-id"}
 
@@ -203,8 +272,9 @@ func TestHandleDetailState(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockService := mocks.NewMockitemService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		mockItemService := mocks.NewMockitemService(ctrl)
+		mockSyncService := mocks.NewMocksyncService(ctrl)
+		model := InitialModel(mockItemService, mockSyncService, time.Second)
 		model.state = DetailState
 		model.selected = &itemRender{ID: "test-id", ItemType: models.TypeText}
 
@@ -219,8 +289,9 @@ func TestHandleProcessingState(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockService := mocks.NewMockitemService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		mockItemService := mocks.NewMockitemService(ctrl)
+		mockSyncService := mocks.NewMocksyncService(ctrl)
+		model := InitialModel(mockItemService, mockSyncService, time.Second)
 		model.state = ProcessingState
 
 		testItems := []itemRender{
@@ -237,8 +308,9 @@ func TestHandleProcessingState(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockService := mocks.NewMockitemService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		mockItemService := mocks.NewMockitemService(ctrl)
+		mockSyncService := mocks.NewMocksyncService(ctrl)
+		model := InitialModel(mockItemService, mockSyncService, time.Second)
 		model.state = ProcessingState
 
 		testErr := errors.New("test error")
@@ -247,6 +319,19 @@ func TestHandleProcessingState(t *testing.T) {
 		assert.Equal(t, ErrorState, newModel.state)
 		assert.Equal(t, testErr.Error(), newModel.errMsg)
 	})
+
+	t.Run("should handle SyncSuccessMsg correctly", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockItemService := mocks.NewMockitemService(ctrl)
+		mockSyncService := mocks.NewMocksyncService(ctrl)
+		model := InitialModel(mockItemService, mockSyncService, time.Second)
+		model.state = ProcessingState
+
+		newModel, _ := handleProcessingState(model, SyncSuccessMsg{})
+		assert.Equal(t, UpdateState, newModel.state)
+	})
 }
 
 func TestView(t *testing.T) {
@@ -254,8 +339,9 @@ func TestView(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockService := mocks.NewMockitemService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		mockItemService := mocks.NewMockitemService(ctrl)
+		mockSyncService := mocks.NewMocksyncService(ctrl)
+		model := InitialModel(mockItemService, mockSyncService, time.Second)
 		model.state = ProcessingState
 
 		view := model.View()
@@ -266,8 +352,9 @@ func TestView(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockService := mocks.NewMockitemService(ctrl)
-		model := InitialModel(mockService, time.Second)
+		mockItemService := mocks.NewMockitemService(ctrl)
+		mockSyncService := mocks.NewMocksyncService(ctrl)
+		model := InitialModel(mockItemService, mockSyncService, time.Second)
 		model.state = ErrorState
 		model.errMsg = "test error"
 

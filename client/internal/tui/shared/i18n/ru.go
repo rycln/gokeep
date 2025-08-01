@@ -24,6 +24,7 @@ const (
 		"Нажмите ESC для возврата к списку..."
 	VaultUpdateHelp  = "обновить"
 	VaultAddItemHelp = "добавить"
+	VaultSyncHelp    = "синхронизировать"
 
 	AuthLoginTitle     = "Вход в GophKeeper"
 	AuthRegisterTitle  = "Регистрация"
