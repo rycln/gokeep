@@ -12,31 +12,31 @@ import (
 	models "github.com/rycln/gokeep/shared/models"
 )
 
-// MockAuthAPI is a mock of AuthAPI interface.
-type MockAuthAPI struct {
+// MockauthAPI is a mock of authAPI interface.
+type MockauthAPI struct {
 	ctrl     *gomock.Controller
-	recorder *MockAuthAPIMockRecorder
+	recorder *MockauthAPIMockRecorder
 }
 
-// MockAuthAPIMockRecorder is the mock recorder for MockAuthAPI.
-type MockAuthAPIMockRecorder struct {
-	mock *MockAuthAPI
+// MockauthAPIMockRecorder is the mock recorder for MockauthAPI.
+type MockauthAPIMockRecorder struct {
+	mock *MockauthAPI
 }
 
-// NewMockAuthAPI creates a new mock instance.
-func NewMockAuthAPI(ctrl *gomock.Controller) *MockAuthAPI {
-	mock := &MockAuthAPI{ctrl: ctrl}
-	mock.recorder = &MockAuthAPIMockRecorder{mock}
+// NewMockauthAPI creates a new mock instance.
+func NewMockauthAPI(ctrl *gomock.Controller) *MockauthAPI {
+	mock := &MockauthAPI{ctrl: ctrl}
+	mock.recorder = &MockauthAPIMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockAuthAPI) EXPECT() *MockAuthAPIMockRecorder {
+func (m *MockauthAPI) EXPECT() *MockauthAPIMockRecorder {
 	return m.recorder
 }
 
 // Login mocks base method.
-func (m *MockAuthAPI) Login(arg0 context.Context, arg1 *models.UserLoginReq) (*models.User, error) {
+func (m *MockauthAPI) Login(arg0 context.Context, arg1 *models.UserLoginReq) (*models.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Login", arg0, arg1)
 	ret0, _ := ret[0].(*models.User)
@@ -45,13 +45,13 @@ func (m *MockAuthAPI) Login(arg0 context.Context, arg1 *models.UserLoginReq) (*m
 }
 
 // Login indicates an expected call of Login.
-func (mr *MockAuthAPIMockRecorder) Login(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockauthAPIMockRecorder) Login(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Login", reflect.TypeOf((*MockAuthAPI)(nil).Login), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Login", reflect.TypeOf((*MockauthAPI)(nil).Login), arg0, arg1)
 }
 
 // Register mocks base method.
-func (m *MockAuthAPI) Register(arg0 context.Context, arg1 *models.UserRegReq) (*models.User, error) {
+func (m *MockauthAPI) Register(arg0 context.Context, arg1 *models.UserRegReq) (*models.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Register", arg0, arg1)
 	ret0, _ := ret[0].(*models.User)
@@ -60,7 +60,7 @@ func (m *MockAuthAPI) Register(arg0 context.Context, arg1 *models.UserRegReq) (*
 }
 
 // Register indicates an expected call of Register.
-func (mr *MockAuthAPIMockRecorder) Register(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockauthAPIMockRecorder) Register(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Register", reflect.TypeOf((*MockAuthAPI)(nil).Register), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Register", reflect.TypeOf((*MockauthAPI)(nil).Register), arg0, arg1)
 }

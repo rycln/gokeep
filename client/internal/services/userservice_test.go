@@ -25,7 +25,7 @@ func TestNewAuthService(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockAPI := mocks.NewMockAuthAPI(ctrl)
+		mockAPI := mocks.NewMockauthAPI(ctrl)
 		service := NewAuthService(mockAPI)
 
 		assert.NotNil(t, service)
@@ -51,7 +51,7 @@ func TestUserService_UserRegister(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockAPI := mocks.NewMockAuthAPI(ctrl)
+		mockAPI := mocks.NewMockauthAPI(ctrl)
 		service := NewAuthService(mockAPI)
 
 		mockAPI.EXPECT().
@@ -67,7 +67,7 @@ func TestUserService_UserRegister(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockAPI := mocks.NewMockAuthAPI(ctrl)
+		mockAPI := mocks.NewMockauthAPI(ctrl)
 		service := NewAuthService(mockAPI)
 
 		expectedErr := errors.New("registration failed")
@@ -98,7 +98,7 @@ func TestUserService_UserLogin(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockAPI := mocks.NewMockAuthAPI(ctrl)
+		mockAPI := mocks.NewMockauthAPI(ctrl)
 		service := NewAuthService(mockAPI)
 
 		mockAPI.EXPECT().
@@ -114,7 +114,7 @@ func TestUserService_UserLogin(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockAPI := mocks.NewMockAuthAPI(ctrl)
+		mockAPI := mocks.NewMockauthAPI(ctrl)
 		service := NewAuthService(mockAPI)
 
 		expectedErr := errors.New("login failed")

@@ -8,19 +8,19 @@ import (
 
 //go:generate mockgen -source=$GOFILE -destination=./mocks/mock_$GOFILE -package=mocks
 
-// AuthAPI defines the interface for authentication operations
-type AuthAPI interface {
+// authAPI defines the interface for authentication operations
+type authAPI interface {
 	Register(context.Context, *models.UserRegReq) (*models.User, error)
 	Login(context.Context, *models.UserLoginReq) (*models.User, error)
 }
 
 // UserService handles user authentication business logic
 type UserService struct {
-	api AuthAPI // Authentication API implementation
+	api authAPI // Authentication API implementation
 }
 
 // NewAuthService creates a new UserService instance
-func NewAuthService(api AuthAPI) *UserService {
+func NewAuthService(api authAPI) *UserService {
 	return &UserService{
 		api: api,
 	}
