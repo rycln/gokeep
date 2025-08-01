@@ -1,4 +1,4 @@
-package server
+package grpc
 
 import (
 	"context"
@@ -18,7 +18,7 @@ type userService interface {
 }
 
 // Register handles user registration requests
-func (h *UserHandler) Register(
+func (h *GophKeeperServer) Register(
 	ctx context.Context,
 	req *pb.RegisterRequest,
 ) (*pb.AuthResponse, error) {
@@ -31,7 +31,7 @@ func (h *UserHandler) Register(
 	ctx, cancel := context.WithTimeout(ctx, h.timeout)
 	defer cancel()
 
-	user, err := h.uservice.CreateUser(ctx, authReq)
+	user, err := h.user.CreateUser(ctx, authReq)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
@@ -44,7 +44,7 @@ func (h *UserHandler) Register(
 }
 
 // Login handles user authentication requests
-func (h *UserHandler) Login(
+func (h *GophKeeperServer) Login(
 	ctx context.Context,
 	req *pb.LoginRequest,
 ) (*pb.AuthResponse, error) {
@@ -56,7 +56,7 @@ func (h *UserHandler) Login(
 	ctx, cancel := context.WithTimeout(ctx, h.timeout)
 	defer cancel()
 
-	user, err := h.uservice.AuthUser(ctx, authReq)
+	user, err := h.user.AuthUser(ctx, authReq)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
@@ -69,7 +69,7 @@ func (h *UserHandler) Login(
 }
 
 // AuthFuncOverride provides authentication middleware hook
-func (s *UserHandler) AuthFuncOverride(
+func (s *GophKeeperServer) AuthFuncOverride(
 	ctx context.Context,
 	fullMethodName string,
 ) (context.Context, error) {

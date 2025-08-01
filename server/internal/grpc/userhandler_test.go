@@ -1,4 +1,4 @@
-package server
+package grpc
 
 import (
 	"context"
@@ -23,7 +23,7 @@ const (
 	testTimeout = 5 * time.Second
 )
 
-func TestUserHandler_Register(t *testing.T) {
+func TestGophKeeperServer_Register(t *testing.T) {
 	testReq := &gophkeeper.RegisterRequest{
 		Username: "testuser",
 		Password: "testpass",
@@ -40,44 +40,54 @@ func TestUserHandler_Register(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockService := mocks.NewMockuserService(ctrl)
-		handler := NewGophKeeperServer(mockService, testTimeout)
+		mockUser := mocks.NewMockuserService(ctrl)
+		mockSync := mocks.NewMocksyncService(ctrl)
+		handler := NewGophKeeperServer(mockUser, mockSync, testTimeout)
 
 		expectedUser := &models.User{
-			ID:  models.UserID(testUserID),
-			JWT: testJWT,
+			ID:   models.UserID(testUserID),
+			JWT:  testJWT,
+			Salt: testSalt,
 		}
 
-		mockService.EXPECT().
+		mockUser.EXPECT().
 			CreateUser(gomock.Any(), expectedAuthReq).
-			Return(expectedUser, nil)
+			DoAndReturn(func(ctx context.Context, _ *models.UserRegReq) (*models.User, error) {
+				_, ok := ctx.Deadline()
+				assert.True(t, ok, "context should have deadline")
+				return expectedUser, nil
+			})
 
 		resp, err := handler.Register(context.Background(), testReq)
 		require.NoError(t, err)
+		require.NotNil(t, resp)
 		assert.Equal(t, testUserID, resp.UserId)
 		assert.Equal(t, testJWT, resp.Token)
+		assert.Equal(t, testSalt, resp.Salt)
 	})
 
 	t.Run("service error returns grpc error", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockService := mocks.NewMockuserService(ctrl)
-		handler := NewGophKeeperServer(mockService, testTimeout)
+		mockUser := mocks.NewMockuserService(ctrl)
+		mockSync := mocks.NewMocksyncService(ctrl)
+		handler := NewGophKeeperServer(mockUser, mockSync, testTimeout)
 
 		testErr := errors.New("test error")
-		mockService.EXPECT().
+		mockUser.EXPECT().
 			CreateUser(gomock.Any(), expectedAuthReq).
 			Return(nil, testErr)
 
-		_, err := handler.Register(context.Background(), testReq)
+		resp, err := handler.Register(context.Background(), testReq)
 		require.Error(t, err)
+		assert.Nil(t, resp)
 		assert.Equal(t, codes.InvalidArgument, status.Code(err))
 		assert.Contains(t, err.Error(), testErr.Error())
 	})
 }
 
-func TestUserHandler_Login(t *testing.T) {
+func TestGophKeeperServer_Login(t *testing.T) {
 	testReq := &gophkeeper.LoginRequest{
 		Username: "testuser",
 		Password: "testpass",
@@ -92,8 +102,9 @@ func TestUserHandler_Login(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockService := mocks.NewMockuserService(ctrl)
-		handler := NewGophKeeperServer(mockService, testTimeout)
+		mockUser := mocks.NewMockuserService(ctrl)
+		mockSync := mocks.NewMocksyncService(ctrl)
+		handler := NewGophKeeperServer(mockUser, mockSync, testTimeout)
 
 		expectedUser := &models.User{
 			ID:   models.UserID(testUserID),
@@ -101,43 +112,52 @@ func TestUserHandler_Login(t *testing.T) {
 			Salt: testSalt,
 		}
 
-		mockService.EXPECT().
+		mockUser.EXPECT().
 			AuthUser(gomock.Any(), expectedAuthReq).
-			Return(expectedUser, nil)
+			DoAndReturn(func(ctx context.Context, _ *models.UserLoginReq) (*models.User, error) {
+				_, ok := ctx.Deadline()
+				assert.True(t, ok, "context should have deadline")
+				return expectedUser, nil
+			})
 
 		resp, err := handler.Login(context.Background(), testReq)
 		require.NoError(t, err)
+		require.NotNil(t, resp)
 		assert.Equal(t, testUserID, resp.UserId)
 		assert.Equal(t, testJWT, resp.Token)
+		assert.Equal(t, testSalt, resp.Salt)
 	})
 
 	t.Run("service error returns grpc error", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockService := mocks.NewMockuserService(ctrl)
-		handler := NewGophKeeperServer(mockService, testTimeout)
+		mockUser := mocks.NewMockuserService(ctrl)
+		mockSync := mocks.NewMocksyncService(ctrl)
+		handler := NewGophKeeperServer(mockUser, mockSync, testTimeout)
 
 		testErr := errors.New("test error")
-		mockService.EXPECT().
+		mockUser.EXPECT().
 			AuthUser(gomock.Any(), expectedAuthReq).
 			Return(nil, testErr)
 
-		_, err := handler.Login(context.Background(), testReq)
+		resp, err := handler.Login(context.Background(), testReq)
 		require.Error(t, err)
+		assert.Nil(t, resp)
 		assert.Equal(t, codes.InvalidArgument, status.Code(err))
 		assert.Contains(t, err.Error(), testErr.Error())
 	})
 }
 
-func TestUserHandler_AuthFuncOverride(t *testing.T) {
+func TestGophKeeperServer_AuthFuncOverride(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockService := mocks.NewMockuserService(ctrl)
-	handler := NewGophKeeperServer(mockService, testTimeout)
+	mockUser := mocks.NewMockuserService(ctrl)
+	mockSync := mocks.NewMocksyncService(ctrl)
+	handler := NewGophKeeperServer(mockUser, mockSync, testTimeout)
 
-	t.Run("always returns nil", func(t *testing.T) {
+	t.Run("always returns original context and nil error", func(t *testing.T) {
 		ctx := context.Background()
 		newCtx, err := handler.AuthFuncOverride(ctx, "test/method")
 		assert.NoError(t, err)
