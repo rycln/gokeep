@@ -9,8 +9,8 @@
 *.test
 
 # Binaries
-cmd/gophkeeper/client/client
-cmd/gophkeeper/server/server
+client/cmd/gophkeeper/gophkeeper
+server/cmd/gophkeeper/gophkeeper
 
 # Dependency directories (remove the comment below to include it)
 vendor/
@@ -20,3 +20,12 @@ vendor/
 
 # Notes
 *.txt
+
+# Local configs
+*.local.json
+
+# Certs
+/certs/
+
+# SQLite
+*.db
