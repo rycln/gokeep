@@ -75,3 +75,7 @@ go build -o gophkeeper
 ./gophkeeper 
 ```
 
+## Лицензия
+
+MIT License
+
